@@ -19,6 +19,11 @@ def new_measurement(request):
 		except ObjectDoesNotExist:
 			charge_session = ChargeSession(specific_charger=current_charger, identifier_key=json_obj["charge-session"])
 			charge_session.save()
+		#saving measurement
+		measurement_to_save = IndividualMeasurementModel(specific_session=charge_session)
+		measurement_to_save.instantaneous_current = json_obj["current"]
+		measurement_to_save.milliampere_second = json_obj["milliamps-second"]
+		measurement_to_save.save()
 		return HttpResponse(
 			content_type='application/json',
 			status=201)

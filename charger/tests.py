@@ -12,23 +12,28 @@ class APITests(TestCase):
 			reverse('charger:new_measurement'),
 			{'charger-id': "a" * 64,
 			'charge-session': "a" * 64,
-			'current': 10
+			'current': 10,
+			'milliamps-second': 100000
 			},
 			content_type="application/json"
 			)
 		self.assertEqual(response.status_code, 403)
+		self.assertEqual(IndividualMeasurementModel.objects.count(), 0)
 	def test_POSTing_instant_measurement(self):
 		a = ChargerModel(identifier_key = "a" * 64)
 		a.save()
+		self.assertEqual(IndividualMeasurementModel.objects.count(), 0)
 		response = self.client.post(
 			reverse('charger:new_measurement'),
 			{'charger-id': "a" * 64,
 			'charge-session': "a" * 64,
-			'current': 10
+			'current': 10,
+			'milliamps-second': 100000
 			},
 			content_type="application/json"
 			)
 		self.assertEqual(response.status_code, 201)
+		self.assertEqual(IndividualMeasurementModel.objects.count(), 1)
 	def test_POSTing_instant_measurement_wrong_charger(self):
 		a = ChargerModel(identifier_key = "a" * 64)
 		a.save()
@@ -37,12 +42,13 @@ class APITests(TestCase):
 			{
 			'charger-id': "b" * 64,
 			'charge-session': "a" * 64,
-			'current': 10
+			'current': 10,
+			'milliamps-second': 100000
 			},
 			content_type="application/json"
 			)
 		self.assertEqual(response.status_code, 403)
-
+		self.assertEqual(IndividualMeasurementModel.objects.count(), 0)
 class ModelTests(TestCase):
 
 	def test_charger_model_uniqueness(self):
