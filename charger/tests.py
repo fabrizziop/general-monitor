@@ -5,12 +5,25 @@ from .models import ChargerModel, ChargeSession, IndividualMeasurementModel
 # Create your tests here.
 
 class APITests(TestCase):
+	def test_GETting_instant_measurement(self):
+		a = ChargerModel(identifier_key = "a" * 64)
+		a.save()
+		response = self.client.get(
+			reverse('charger:new_measurement'),
+			{'charger-id': "a" * 64,
+			'charge-session': "a" * 64,
+			'current': 10
+			},
+			content_type="application/json"
+			)
+		self.assertEqual(response.status_code, 403)
 	def test_POSTing_instant_measurement(self):
 		a = ChargerModel(identifier_key = "a" * 64)
 		a.save()
 		response = self.client.post(
 			reverse('charger:new_measurement'),
 			{'charger-id': "a" * 64,
+			'charge-session': "a" * 64,
 			'current': 10
 			},
 			content_type="application/json"
@@ -23,6 +36,7 @@ class APITests(TestCase):
 			reverse('charger:new_measurement'),
 			{
 			'charger-id': "b" * 64,
+			'charge-session': "a" * 64,
 			'current': 10
 			},
 			content_type="application/json"
