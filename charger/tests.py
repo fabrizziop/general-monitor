@@ -3,18 +3,21 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 from .models import ChargerModel, ChargeSession, IndividualMeasurementModel
 # Create your tests here.
-
+def generate_test_recv_object(charger_id="a"*64, charge_session="a"*64, current=6, voltage=2774, emergency=0, milliamps_second=50):
+	return {'charger-id': charger_id,
+		'charge-session': charge_session,
+		'current': current,
+		'voltage': voltage,
+		'emergency': emergency,
+		'milliamps-second': milliamps_second
+		}
 class APITests(TestCase):
 	def test_GETting_instant_measurement(self):
 		a = ChargerModel(identifier_key = "a" * 64)
 		a.save()
 		response = self.client.get(
 			reverse('charger:new_measurement'),
-			{'charger-id': "a" * 64,
-			'charge-session': "a" * 64,
-			'current': 10,
-			'milliamps-second': 100000
-			},
+			generate_test_recv_object(),
 			content_type="application/json"
 			)
 		self.assertEqual(response.status_code, 403)
@@ -25,11 +28,7 @@ class APITests(TestCase):
 		self.assertEqual(IndividualMeasurementModel.objects.count(), 0)
 		response = self.client.post(
 			reverse('charger:new_measurement'),
-			{'charger-id': "a" * 64,
-			'charge-session': "a" * 64,
-			'current': 10,
-			'milliamps-second': 100000
-			},
+			generate_test_recv_object(),
 			content_type="application/json"
 			)
 		self.assertEqual(response.status_code, 201)
@@ -39,12 +38,7 @@ class APITests(TestCase):
 		a.save()
 		response = self.client.post(
 			reverse('charger:new_measurement'),
-			{
-			'charger-id': "b" * 64,
-			'charge-session': "a" * 64,
-			'current': 10,
-			'milliamps-second': 100000
-			},
+			generate_test_recv_object(charger_id = "b" * 64),
 			content_type="application/json"
 			)
 		self.assertEqual(response.status_code, 403)
