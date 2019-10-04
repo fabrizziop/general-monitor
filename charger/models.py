@@ -3,6 +3,9 @@ from django.utils import timezone
 # Create your models here.
 class ChargerModel(models.Model):
 	identifier_key = models.CharField(max_length=64, unique=True)
+	charger_name = models.CharField(max_length=64, default="", blank=True)
+	def __str__(self):
+		return self.charger_name
 
 class ChargeSession(models.Model):
 	specific_charger = models.ForeignKey(ChargerModel, on_delete=models.CASCADE)

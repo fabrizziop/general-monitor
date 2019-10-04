@@ -81,3 +81,8 @@ class ModelTests(TestCase):
 		d.save()
 		self.assertIn(c, list(b.individualmeasurementmodel_set.all()))
 		self.assertIn(d, list(b.individualmeasurementmodel_set.all()))
+
+class IndexViewTests(TestCase):
+	def test_index_view_correct_template(self):
+		response = self.client.get(reverse('charger:main_index'))
+		self.assertTemplateUsed(response, 'charger/index.html')
