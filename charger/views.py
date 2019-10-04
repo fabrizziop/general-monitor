@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.views.decorators.csrf import csrf_exempt
 from .models import ChargerModel, ChargeSession, IndividualMeasurementModel
 import json
 # Create your views here.
 
+@csrf_exempt
 def new_measurement(request):
 	if request.method == 'POST':
 		#print(request.body)
