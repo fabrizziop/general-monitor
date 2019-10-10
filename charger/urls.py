@@ -4,6 +4,8 @@ from . import views
 app_name = "charger"
 
 urlpatterns = [
-	path('', views.main_index, name="main_index"),
+	path('nojs/', views.main_index, name="main_index"),
+	path('', views.main_react, name="main_react"),
     path('new-measurement', views.new_measurement, name="new_measurement"),
+    path('last-data', views.get_last_data_api, name="last_data")
 ]

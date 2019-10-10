@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_exempt
 from .models import ChargerModel, ChargeSession, IndividualMeasurementModel
@@ -26,6 +26,8 @@ def new_measurement(request):
 		measurement_to_save.instantaneous_voltage = json_obj["voltage"]
 		measurement_to_save.milliampere_second = json_obj["milliamps-second"]
 		measurement_to_save.emergency_status = json_obj["emergency"]
+		charge_session.mas_sum = charge_session.mas_sum + measurement_to_save.milliampere_second
+		charge_session.save()
 		measurement_to_save.save()
 		return HttpResponse(
 			content_type='application/json',
@@ -37,6 +39,18 @@ def main_index(request):
 	all_chargers = ChargerModel.objects.all()
 	return render(request, 'charger/index.html',
 		context={"all_chargers": all_chargers})
+
+def main_react(request):
+	return render(request, 'charger/index-react.html')
+
+def get_last_data_api(request):
+	data_to_send = []
+	for charger in ChargerModel.objects.all():
+		temp_data = {
+			'charger_id': charger.identifier_key
+		}
+		data_to_send.append(temp_data)
+	return JsonResponse({'all_chargers_data': data_to_send}, status=200)
 
 # def get_session_data(request):
 # 	if request.method == 'POST':

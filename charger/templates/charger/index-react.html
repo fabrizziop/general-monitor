@@ -1,0 +1,28 @@
+{% extends 'charger/base-react.html' %}
+{% block page_script %}
+<script type="text/babel">
+
+class MainMonitor extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentlyIsSession: true,
+    };
+    this.refreshData = this.refreshData.bind(this);
+  }
+  componentDidMount() {
+    this.intervalHolder = false;
+  }
+  refreshData() {
+    return 1;
+  }
+  render() {
+    return (
+      
+    )
+  }
+}
+console.clear();
+ReactDOM.render(<MainClock defaultSession={25} defaultBreak={5} beepUrl={"https://res.cloudinary.com/dkydcr6za/video/upload/v1567220020/Hotel-door-beep-sound-effect_qgghv8.mp3"}/>, document.getElementById("react-id")); 
+</script>
+{% endblock %}

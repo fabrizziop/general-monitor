@@ -9,6 +9,7 @@ class ChargerModel(models.Model):
 
 class ChargeSession(models.Model):
 	specific_charger = models.ForeignKey(ChargerModel, on_delete=models.CASCADE)
+	mas_sum = models.BigIntegerField(default=0, blank=True)
 	identifier_key = models.CharField(max_length=64, unique=True)
 
 class IndividualMeasurementModel(models.Model):
