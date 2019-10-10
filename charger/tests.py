@@ -140,20 +140,57 @@ class ReactViewTests(TestCase):
 		self.assertTemplateUsed(response, 'charger/index-react.html')
 
 class LastDataAPITests(TestCase):
-	def test_get_latest_session(self):
-		a = ChargerModel(identifier_key = "a" * 64)
-		a.full_clean()
-		a.save()
-		b = ChargerModel(identifier_key = "b" * 64)
-		b.full_clean()
-		b.save()
-		c = ChargeSession(specific_charger = a, identifier_key = "b" * 64)
-		c.full_clean()
-		c.save()
-		d = ChargeSession(specific_charger = a, identifier_key = "c" * 64)
-		d.full_clean()
-		d.save()
-		e = ChargeSession.objects.create(specific_charger = b, identifier_key = "d" * 64)
+	def test_only_get_is_allowed(self):
+		response = self.client.post(reverse('charger:last_data'),
+			{'blah': 1},
+			content_type="application/json"
+			)
+		self.assertEqual(response.status_code, 403)
+	def test_get_latest_session_data_when_there_are_no_sessions(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64)
 		response = self.client.get(reverse('charger:last_data'))
+		self.assertEqual(response.status_code, 500)
+
+	def test_get_latest_session_data_expected_ok(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64)
+		model_b = ChargerModel.objects.create(identifier_key = "b" * 64)
+		c = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "b" * 64, mas_sum=100)
+		d = ChargeSession.objects.create(specific_charger = model_b, identifier_key = "c" * 64, mas_sum=20)
+		e = ChargeSession.objects.create(specific_charger = model_b, identifier_key = "d" * 64, mas_sum=10)
+		f = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=100,
+			instantaneous_voltage=2800,
+			emergency_status=1)
+		g = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=20,
+			instantaneous_voltage=200,
+			emergency_status=0)
+		h = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=10,
+			instantaneous_voltage=1,
+			emergency_status=3)
+		i = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=9999,
+			instantaneous_voltage=9888,
+			emergency_status=4)
+		response = self.client.get(reverse('charger:last_data'))
+		self.assertEqual(response.status_code, 200)
 		response_decoded_json = json.loads(response.content.decode('utf-8'))
-		print(response_decoded_json)
+		response_main_obj = response_decoded_json['all_chargers_data']
+		self.assertEqual(response_main_obj[0]['charger_id'], model_a.identifier_key)
+		self.assertEqual(response_main_obj[0]['last_session_id'], c.identifier_key)
+		self.assertEqual(response_main_obj[0]['last_session_mah'], c.mas_sum)
+		self.assertEqual(response_main_obj[0]['last_measurement']['voltage'], f.instantaneous_voltage)
+		self.assertEqual(response_main_obj[0]['last_measurement']['current'], f.instantaneous_current)
+		self.assertEqual(response_main_obj[0]['last_measurement']['emergency'], f.emergency_status)
+		self.assertEqual(response_main_obj[0]['last_measurement']['mas'], f.milliampere_second)
+		self.assertEqual(response_main_obj[0]['last_measurement']['timestamp'][:19]+"Z", f.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+		self.assertEqual(response_main_obj[1]['charger_id'], model_b.identifier_key)
+		self.assertEqual(response_main_obj[1]['last_session_id'], e.identifier_key)
+		self.assertEqual(response_main_obj[1]['last_session_mah'], e.mas_sum)
+		self.assertEqual(response_main_obj[1]['last_measurement']['voltage'], i.instantaneous_voltage)
+		self.assertEqual(response_main_obj[1]['last_measurement']['current'], i.instantaneous_current)
+		self.assertEqual(response_main_obj[1]['last_measurement']['emergency'], i.emergency_status)
+		self.assertEqual(response_main_obj[1]['last_measurement']['mas'], i.milliampere_second)
+		self.assertEqual(response_main_obj[1]['last_measurement']['timestamp'][:19]+"Z", i.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+		#print(response_decoded_json)

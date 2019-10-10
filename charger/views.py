@@ -44,11 +44,27 @@ def main_react(request):
 	return render(request, 'charger/index-react.html')
 
 def get_last_data_api(request):
+	if request.method != "GET":
+		return HttpResponse(status=403)
 	data_to_send = []
 	for charger in ChargerModel.objects.all():
-		temp_data = {
-			'charger_id': charger.identifier_key
-		}
+		try:
+			last_session = charger.chargesession_set.latest('id')
+			last_measurement = last_session.individualmeasurementmodel_set.latest('id')
+			temp_data = {
+				'charger_id': charger.identifier_key,
+				'last_session_id': last_session.identifier_key,
+				'last_session_mah': last_session.mas_sum,
+				'last_measurement': {
+					'voltage': last_measurement.instantaneous_voltage,
+					'current': last_measurement.instantaneous_current,
+					'emergency': last_measurement.emergency_status,
+					'mas': last_measurement.milliampere_second,
+					'timestamp': last_measurement.timestamp
+				}
+			}
+		except ObjectDoesNotExist:
+			return HttpResponse(status=500)
 		data_to_send.append(temp_data)
 	return JsonResponse({'all_chargers_data': data_to_send}, status=200)
 
