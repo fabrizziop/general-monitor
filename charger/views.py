@@ -53,8 +53,9 @@ def get_last_data_api(request):
 			last_measurement = last_session.individualmeasurementmodel_set.latest('id')
 			temp_data = {
 				'charger_id': charger.identifier_key,
+				'charger_name': charger.charger_name,
 				'last_session_id': last_session.identifier_key,
-				'last_session_mah': last_session.mas_sum,
+				'last_session_mas': last_session.mas_sum,
 				'last_measurement': {
 					'voltage': last_measurement.instantaneous_voltage,
 					'current': last_measurement.instantaneous_current,
@@ -67,78 +68,3 @@ def get_last_data_api(request):
 			return HttpResponse(status=500)
 		data_to_send.append(temp_data)
 	return JsonResponse({'all_chargers_data': data_to_send}, status=200)
-
-# def get_session_data(request):
-# 	if request.method == 'POST':
-# 		#print(request.body)
-# 		json_obj = json.loads(request.body)
-# 		try:
-# 			current_charger = ChargerModel.objects.get(identifier_key=json_obj["charger-id"])
-# 			print("OK")
-# 		except ObjectDoesNotExist:
-# 			return HttpResponse(status=403)
-# 		try:
-# 			charge_session = ChargeSession.objects.get(identifier_key=json_obj["charge-session"])
-# 		except ObjectDoesNotExist:
-# 			charge_session = ChargeSession(specific_charger=current_charger, identifier_key=json_obj["charge-session"])
-# 			charge_session.save()
-# 		#saving measurement
-# 		measurement_to_save = IndividualMeasurementModel(specific_session=charge_session)
-# 		measurement_to_save.instantaneous_current = json_obj["current"]
-# 		measurement_to_save.milliampere_second = json_obj["milliamps-second"]
-# 		measurement_to_save.save()
-# 		return HttpResponse(
-# 			content_type='application/json',
-# 			status=201)
-# 	else:
-# 		return HttpResponse(status=403)
-
-# def get_all_data(request):
-# 	if request.method == 'POST':
-# 		#print(request.body)
-# 		json_obj = json.loads(request.body)
-# 		try:
-# 			current_charger = ChargerModel.objects.get(identifier_key=json_obj["charger-id"])
-# 			print("OK")
-# 		except ObjectDoesNotExist:
-# 			return HttpResponse(status=403)
-# 		try:
-# 			charge_session = ChargeSession.objects.get(identifier_key=json_obj["charge-session"])
-# 		except ObjectDoesNotExist:
-# 			charge_session = ChargeSession(specific_charger=current_charger, identifier_key=json_obj["charge-session"])
-# 			charge_session.save()
-# 		#saving measurement
-# 		measurement_to_save = IndividualMeasurementModel(specific_session=charge_session)
-# 		measurement_to_save.instantaneous_current = json_obj["current"]
-# 		measurement_to_save.milliampere_second = json_obj["milliamps-second"]
-# 		measurement_to_save.save()
-# 		return HttpResponse(
-# 			content_type='application/json',
-# 			status=201)
-# 	else:
-# 		return HttpResponse(status=403)
-
-# def get_last_data(request):
-# 	if request.method == 'GET':
-# 		#print(request.body)
-# 		json_obj = json.loads(request.body)
-# 		try:
-# 			current_charger = ChargerModel.objects.get(identifier_key=json_obj["charger-id"])
-# 			print("OK")
-# 		except ObjectDoesNotExist:
-# 			return HttpResponse(status=403)
-# 		try:
-# 			charge_session = ChargeSession.objects.get(identifier_key=json_obj["charge-session"])
-# 		except ObjectDoesNotExist:
-# 			charge_session = ChargeSession(specific_charger=current_charger, identifier_key=json_obj["charge-session"])
-# 			charge_session.save()
-# 		#saving measurement
-# 		measurement_to_save = IndividualMeasurementModel(specific_session=charge_session)
-# 		measurement_to_save.instantaneous_current = json_obj["current"]
-# 		measurement_to_save.milliampere_second = json_obj["milliamps-second"]
-# 		measurement_to_save.save()
-# 		return HttpResponse(
-# 			content_type='application/json',
-# 			status=201)
-# 	else:
-# 		return HttpResponse(status=403)
