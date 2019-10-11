@@ -62,15 +62,25 @@ class LiveDataDisplay extends React.Component {
     super(props);
   }
   render() {
+    const session_info = this.props.collectedData.all_chargers_data.map((obj) => {
+        console.log(obj);
+        return (
+          <div id="live-data-info">
+            <div class="charger-data">Charger ID: {obj.charger_id}</div>
+            <div class="charger-data">Session: {obj.last_session_id}</div>
+            <div class="charger-data">Milliamps-hour: {obj.last_session_mah}</div>
+            <div class="measurement-data">Timestamp: {obj.last_measurement.timestamp}</div>
+            <div class="measurement-data">Emergency: {obj.last_measurement.emergency}</div>
+            <div class="measurement-data">Voltage: {obj.last_measurement.voltage}</div>
+            <div class="measurement-data">Current: {obj.last_measurement.current}</div>
+            <div class="measurement-data">mAs: {obj.last_measurement.mas}</div>
+          </div>
+          );
+      })
     console.log(this.props.collectedData);
     return (
       <div id="live-data-display">
-        {this.props.collectedData.all_chargers_data.map((obj) => {
-          console.log(obj);
-          return (
-            <div>{obj.charger_id}</div>
-            )
-        })}
+        {session_info}
       </div>
       )
   }
