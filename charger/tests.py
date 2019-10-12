@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 from .models import ChargerModel, ChargeSession, IndividualMeasurementModel
 import json
+import datetime
+from django.utils import timezone
 # Create your tests here.
 def generate_test_recv_object(charger_id="a"*64, charge_session="a"*64, current=6, voltage=2774, emergency=0, milliamps_second=50):
 	return {'charger-id': charger_id,
@@ -168,7 +170,8 @@ class LastDataAPITests(TestCase):
 		h = IndividualMeasurementModel.objects.create(specific_session = e, 
 			instantaneous_current=10,
 			instantaneous_voltage=1,
-			emergency_status=3)
+			emergency_status=3,
+			timestamp=timezone.now()-datetime.timedelta(days=2))
 		i = IndividualMeasurementModel.objects.create(specific_session = e, 
 			instantaneous_current=9999,
 			instantaneous_voltage=9888,
@@ -177,19 +180,19 @@ class LastDataAPITests(TestCase):
 		self.assertEqual(response.status_code, 200)
 		response_decoded_json = json.loads(response.content.decode('utf-8'))
 		response_main_obj = response_decoded_json['all_chargers_data']
-		self.assertEqual(response_main_obj[0]['charger_id'], model_a.identifier_key)
 		self.assertEqual(response_main_obj[0]['charger_name'], model_a.charger_name)
 		self.assertEqual(response_main_obj[0]['last_session_id'], c.identifier_key)
 		self.assertEqual(response_main_obj[0]['last_session_mas'], c.mas_sum)
+		self.assertEqual(response_main_obj[0]['last_session_begin'][:19]+"Z", f.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
 		self.assertEqual(response_main_obj[0]['last_measurement']['voltage'], f.instantaneous_voltage)
 		self.assertEqual(response_main_obj[0]['last_measurement']['current'], f.instantaneous_current)
 		self.assertEqual(response_main_obj[0]['last_measurement']['emergency'], f.emergency_status)
 		self.assertEqual(response_main_obj[0]['last_measurement']['mas'], f.milliampere_second)
 		self.assertEqual(response_main_obj[0]['last_measurement']['timestamp'][:19]+"Z", f.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
-		self.assertEqual(response_main_obj[1]['charger_id'], model_b.identifier_key)
 		self.assertEqual(response_main_obj[1]['charger_name'], model_b.charger_name)
 		self.assertEqual(response_main_obj[1]['last_session_id'], e.identifier_key)
 		self.assertEqual(response_main_obj[1]['last_session_mas'], e.mas_sum)
+		self.assertEqual(response_main_obj[1]['last_session_begin'][:19]+"Z", h.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
 		self.assertEqual(response_main_obj[1]['last_measurement']['voltage'], i.instantaneous_voltage)
 		self.assertEqual(response_main_obj[1]['last_measurement']['current'], i.instantaneous_current)
 		self.assertEqual(response_main_obj[1]['last_measurement']['emergency'], i.emergency_status)

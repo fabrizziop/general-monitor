@@ -52,10 +52,10 @@ def get_last_data_api(request):
 			last_session = charger.chargesession_set.latest('id')
 			last_measurement = last_session.individualmeasurementmodel_set.latest('id')
 			temp_data = {
-				'charger_id': charger.identifier_key,
 				'charger_name': charger.charger_name,
 				'last_session_id': last_session.identifier_key,
 				'last_session_mas': last_session.mas_sum,
+				'last_session_begin': last_session.individualmeasurementmodel_set.first().timestamp,
 				'last_measurement': {
 					'voltage': last_measurement.instantaneous_voltage,
 					'current': last_measurement.instantaneous_current,

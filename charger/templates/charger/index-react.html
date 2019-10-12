@@ -66,8 +66,9 @@ class LiveDataDisplay extends React.Component {
         console.log(obj);
         return (
           <div id="live-data-info">
-            <div class="charger-data">Charger ID: {obj.charger_id}</div>
+            <div class="charger-data">Charger ID: {obj.charger_name}</div>
             <div class="charger-data">Session: {obj.last_session_id}</div>
+            <div class="charger-data">Session Begin: {obj.last_session_begin}</div>
             <div class="charger-data">Milliamps-hour: {obj.last_session_mas}</div>
             <div class="measurement-data">Timestamp: {obj.last_measurement.timestamp}</div>
             <div class="measurement-data">Emergency: {obj.last_measurement.emergency}</div>
