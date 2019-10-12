@@ -1,3 +1,26 @@
+body {
+	background-color: hsl(0, 0%, 20%);
+}
+
 #react-id {
-	background-color: teal;
+	margin: auto;
+	background-color: hsl(0, 0%, 90%);
+	width: fit-content;
+	margin-top: 3rem;
+	box-shadow: 4px 4px 4px hsl(0, 0%, 10%);
+	border-radius: 0.5rem;
+	padding: 0.5rem;
+}
+
+#live-data-valid {
+	text-align: center;
+	font-size: 1.2rem;
+	text-shadow: 0px 0px 10px hsl(0, 0%, 20%);
+}
+
+.valid-data {
+	color: green;
+}
+.invalid-data {
+	color: red;
 }
