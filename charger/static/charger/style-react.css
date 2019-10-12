@@ -24,3 +24,14 @@ body {
 .invalid-data {
 	color: red;
 }
+
+.main-buttons {
+	display: block;
+	margin: auto;
+	font-size: 1.2rem;
+	text-shadow: 0px 0px 10px hsl(0, 0%, 40%);
+	color: black;
+	background: none;
+	border: 2px solid hsl(0, 0%, 50%);
+	border-radius: 5px;
+}

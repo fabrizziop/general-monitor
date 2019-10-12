@@ -8,11 +8,16 @@ class MainMonitor extends React.Component {
     this.state = {
       showLiveData: true,
     };
+    this.toggleLiveDisplay = this.toggleLiveDisplay.bind(this);
+  }
+  toggleLiveDisplay() {
+    this.setState({showLiveData: !this.state.showLiveData});
   }
   render() {
     return (
       <div>
-        <LiveDataMain />
+        {(this.state.showLiveData) ? <LiveDataMain /> : ''}
+        <button id="toggle-live-data" className="main-buttons toggle-buttons" type="button" onClick={this.toggleLiveDisplay}>{(this.state.showLiveData) ? 'Hide Data' : 'Show Data'}</button>
       </div>
       )
   }
@@ -23,10 +28,12 @@ class LiveDataMain extends React.Component {
     super(props);
     this.state = {
       isInitialized: false,
+      isShowingLiveData: true,
       isLastDataValid: false,
       lastDataCollected: []
     };
     this.refreshData = this.refreshData.bind(this);
+
   }
   componentDidMount() {
     this.refreshData();
@@ -35,6 +42,7 @@ class LiveDataMain extends React.Component {
   componentWillUnmount() {
     clearInterval(this.refreshInterval);
   }
+
   async refreshData() {
     try {
       const response = await fetch('last-data');
@@ -50,7 +58,7 @@ class LiveDataMain extends React.Component {
     console.log(this.state.lastDataCollected);
     return (
       <div id="live-monitor">
-        <div id="live-data-valid" class={this.state.isLastDataValid ? "valid-data" : "invalid-data"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
+        <div id="live-data-valid" className={this.state.isLastDataValid ? "valid-data" : "invalid-data"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
         {(this.state.isInitialized) ? (<LiveDataDisplay collectedData={this.state.lastDataCollected}/>) : (<div>Not Initialized</div>)}
       </div>
       )
@@ -66,15 +74,15 @@ class LiveDataDisplay extends React.Component {
         console.log(obj);
         return (
           <div id="live-data-info">
-            <div class="charger-data">Charger ID: {obj.charger_name}</div>
-            <div class="charger-data">Session: {obj.last_session_id.slice(0,8)}</div>
-            <div class="charger-data">Session Begin: {obj.last_session_begin}</div>
-            <div class="charger-data">Milliamps-hour: {obj.last_session_mas}</div>
-            <div class="measurement-data">Timestamp: {obj.last_measurement.timestamp}</div>
-            <div class="measurement-data">Emergency: {obj.last_measurement.emergency}</div>
-            <div class="measurement-data">Voltage: {obj.last_measurement.voltage}</div>
-            <div class="measurement-data">Current: {obj.last_measurement.current}</div>
-            <div class="measurement-data">mAs: {obj.last_measurement.mas}</div>
+            <div className="charger-data">Charger ID: {obj.charger_name}</div>
+            <div className="charger-data">Session: {obj.last_session_id.slice(0,8)}</div>
+            <div className="charger-data">Session Begin: {obj.last_session_begin}</div>
+            <div className="charger-data">Milliamps-hour: {obj.last_session_mas}</div>
+            <div className="measurement-data">Timestamp: {obj.last_measurement.timestamp}</div>
+            <div className="measurement-data">Emergency: {obj.last_measurement.emergency}</div>
+            <div className="measurement-data">Voltage: {obj.last_measurement.voltage}</div>
+            <div className="measurement-data">Current: {obj.last_measurement.current}</div>
+            <div className="measurement-data">mAs: {obj.last_measurement.mas}</div>
           </div>
           );
       })
