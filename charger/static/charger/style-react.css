@@ -38,7 +38,8 @@ body {
 }
 
 .outage-data {
-	border: 2px dashed red;
+	border: 2px solid red;
 	border-radius: 5px;
 	padding: 0.25rem;
+	text-align: center;
 }
