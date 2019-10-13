@@ -34,4 +34,11 @@ body {
 	background: none;
 	border: 2px dashed hsl(0, 0%, 50%);
 	border-radius: 5px;
+	outline: none;
+}
+
+.outage-data {
+	border: 2px dashed red;
+	border-radius: 5px;
+	padding: 0.25rem;
 }

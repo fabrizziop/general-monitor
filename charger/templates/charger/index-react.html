@@ -71,20 +71,49 @@ class LiveDataDisplay extends React.Component {
   }
   render() {
     const session_info = this.props.collectedData.all_chargers_data.map((obj) => {
-        console.log(obj);
-        return (
-          <div id="live-data-info">
-            <div className="charger-data">Charger ID: {obj.charger_name}</div>
-            <div className="charger-data">Session: {obj.last_session_id.slice(0,8)}</div>
-            <div className="charger-data">Session Begin: {obj.last_session_begin}</div>
-            <div className="charger-data">Milliamps-second: {obj.last_session_mas}</div>
-            <div className="measurement-data">Timestamp: {obj.last_measurement.timestamp}</div>
-            <div className="measurement-data">Emergency: {obj.last_measurement.emergency}</div>
-            <div className="measurement-data">Voltage: {obj.last_measurement.voltage}</div>
-            <div className="measurement-data">Current: {obj.last_measurement.current}</div>
-            <div className="measurement-data">mAs: {obj.last_measurement.mas}</div>
-          </div>
-          );
+        //console.log(obj);
+        let current_outage = '';
+        let previous_outage = '';
+        try {
+          if (obj.current_outage.valid) {
+            current_outage = (
+              <div className="outage-data">
+                <div className="measurement-data">CURRENT OUTAGE</div>
+                <div className="measurement-data">Emergency: {obj.current_outage.emergency}</div>
+                <div className="measurement-data">Timestamp: {obj.current_outage.timestamp}</div>
+              </div>);
+          };
+          if (obj.previous_outage.valid) {
+            previous_outage = (
+              <div className="outage-data">
+                <div className="measurement-data">PREVIOUS OUTAGE</div>
+                <div className="measurement-data">Emergency: {obj.previous_outage.emergency}</div>
+                <div className="measurement-data">Start: {obj.previous_outage.timestamp_start}</div>
+                <div className="measurement-data">End: {obj.previous_outage.timestamp_end}</div>
+              </div>);
+          };
+          return (
+            <div id="live-data-info">
+              {current_outage}
+              {previous_outage}
+              <div className="charger-data">Charger: {obj.charger_name}</div>
+              <div className="charger-data">Session: {obj.last_session_id.slice(0,8)}</div>
+              <div className="charger-data">Session Begin: {obj.last_session_begin}</div>
+              <div className="charger-data">Milliamps-second: {obj.last_session_mas}</div>
+              <div className="measurement-data">Timestamp: {obj.last_measurement.timestamp}</div>
+              <div className="measurement-data">Emergency: {obj.last_measurement.emergency}</div>
+              <div className="measurement-data">Voltage: {obj.last_measurement.voltage}</div>
+              <div className="measurement-data">Current: {obj.last_measurement.current}</div>
+              <div className="measurement-data">mAs: {obj.last_measurement.mas}</div>
+            </div>
+            );
+        } catch (error) {
+          return (
+            <div id="live-data-info">
+              <div className="charger-data">API ERROR/WRONG DATA</div>
+            </div>
+            )
+        };
       })
     console.log(this.props.collectedData);
     return (
