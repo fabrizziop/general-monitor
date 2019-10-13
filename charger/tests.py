@@ -199,3 +199,130 @@ class LastDataAPITests(TestCase):
 		self.assertEqual(response_main_obj[1]['last_measurement']['mas'], i.milliampere_second)
 		self.assertEqual(response_main_obj[1]['last_measurement']['timestamp'][:19]+"Z", i.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
 		#print(response_decoded_json)
+
+	def test_get_current_outage_cause(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64, charger_name = "f00f")
+		c = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "b" * 64, mas_sum=100)
+		d = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "c" * 64, mas_sum=20)
+		e = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "d" * 64, mas_sum=10)
+		f = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=100,
+			instantaneous_voltage=2800,
+			emergency_status=1)
+		g = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=20,
+			instantaneous_voltage=200,
+			emergency_status=0)
+		h = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=10,
+			instantaneous_voltage=1,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=3))
+		i = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=9999,
+			instantaneous_voltage=9888,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=2))
+		j = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=8888,
+			instantaneous_voltage=7777,
+			emergency_status=1,
+			timestamp=timezone.now()-datetime.timedelta(days=1))
+		k = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=2222,
+			instantaneous_voltage=2222,
+			emergency_status=2)
+		response = self.client.get(reverse('charger:last_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['all_chargers_data']
+		self.assertEqual(response_main_obj[0]['charger_name'], model_a.charger_name)
+		self.assertEqual(response_main_obj[0]['current_outage']['valid'], True)
+		self.assertEqual(response_main_obj[0]['current_outage']['emergency'], j.emergency_status)
+		self.assertEqual(response_main_obj[0]['current_outage']['timestamp'][:19]+"Z", j.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+
+	def test_get_current_outage_false_condition(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64, charger_name = "f00f")
+		c = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "b" * 64, mas_sum=100)
+		d = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "c" * 64, mas_sum=20)
+		e = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "d" * 64, mas_sum=10)
+		f = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=100,
+			instantaneous_voltage=2800,
+			emergency_status=1)
+		g = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=20,
+			instantaneous_voltage=200,
+			emergency_status=1)
+		h = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=10,
+			instantaneous_voltage=1,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=3))
+		i = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=9999,
+			instantaneous_voltage=9888,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=2))
+		j = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=8888,
+			instantaneous_voltage=7777,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=1))
+		k = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=2222,
+			instantaneous_voltage=2222,
+			emergency_status=0)
+		response = self.client.get(reverse('charger:last_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['all_chargers_data']
+		self.assertEqual(response_main_obj[0]['charger_name'], model_a.charger_name)
+		self.assertEqual(response_main_obj[0]['current_outage']['valid'], False)
+		self.assertEqual(response_main_obj[0]['current_outage']['emergency'], False)
+		self.assertEqual(response_main_obj[0]['current_outage']['timestamp'], False)
+
+	def test_get_previous_outage_cause(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64, charger_name = "f00f")
+		c = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "b" * 64, mas_sum=100)
+		d = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "c" * 64, mas_sum=20)
+		e = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "d" * 64, mas_sum=10)
+		f = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=100,
+			instantaneous_voltage=2800,
+			emergency_status=1,
+			timestamp=timezone.now()-datetime.timedelta(days=5))
+		g = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=20,
+			instantaneous_voltage=200,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=4))
+		h = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=10,
+			instantaneous_voltage=1,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=3))
+		i = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=9999,
+			instantaneous_voltage=9888,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=2))
+		j = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=8888,
+			instantaneous_voltage=7777,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=1))
+		k = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=2222,
+			instantaneous_voltage=2222,
+			emergency_status=0)
+		response = self.client.get(reverse('charger:last_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['all_chargers_data']
+		self.assertEqual(response_main_obj[0]['charger_name'], model_a.charger_name)
+		self.assertEqual(response_main_obj[0]['current_outage']['valid'], False)
+		self.assertEqual(response_main_obj[0]['previous_outage']['valid'], True)
+		self.assertEqual(response_main_obj[0]['previous_outage']['emergency'], f.emergency_status)
+		self.assertEqual(response_main_obj[0]['previous_outage']['timestamp_start'][:19]+"Z", f.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+		self.assertEqual(response_main_obj[0]['previous_outage']['timestamp_end'][:19]+"Z", g.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
