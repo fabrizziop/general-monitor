@@ -4,3 +4,4 @@ __pycache__
 mainmonitor/secrets.py
 charger/secrets.py
 charger/migrations/*
+/static
