@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn server
+
+[Service]
+Restart=on-failure
+User=fabridev
+WorkingDirectory=/home/fabridev/sites/monitor.vz1.win
+EnvironmentFile=/home/fabridev/sites/monitor.vz1.win/.env
+
+ExecStart=/home/fabridev/sites/monitor.vz1.win/virtualenv/bin/gunicorn mainmonitor.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+
