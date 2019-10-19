@@ -85,24 +85,42 @@ class LiveDataDisplay extends React.Component {
           if (obj.current_outage.valid) {
             current_outage = (
               <table className="main-table urgent-table">
-                <div className="measurement-data">CURRENT OUTAGE</div>
-                <div className="measurement-data">Emergency: {obj.current_outage.emergency}</div>
-                <div className="measurement-data">Timestamp: {obj.current_outage.timestamp}</div>
+                <tr>
+                  <th className="data-table-title" colspan="2">CURRENT OUTAGE</th>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Emergency</th>
+                  <td className="data-table-value">{obj.current_outage.emergency}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Timestamp</th>
+                  <td className="data-table-value">{obj.current_outage.timestamp}</td>
+                </tr>
               </table>);
           };
           if (obj.previous_outage.valid) {
             previous_outage = (
               <table className="main-table important-table">
-                <div className="measurement-data">PREVIOUS OUTAGE</div>
-                <div className="measurement-data">Emergency: {obj.previous_outage.emergency}</div>
-                <div className="measurement-data">Start: {obj.previous_outage.timestamp_start}</div>
-                <div className="measurement-data">End: {obj.previous_outage.timestamp_end}</div>
+                <tr>
+                  <th className="data-table-title" colspan="2">PREVIOUS OUTAGE</th>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Emergency</th>
+                  <td className="data-table-value">{obj.previous_outage.emergency}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Start</th>
+                  <td className="data-table-value">{obj.previous_outage.timestamp_start}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">End</th>
+                  <td className="data-table-value">{obj.previous_outage.timestamp_end}</td>
+                </tr>
               </table>);
           };
           return (
             <div id="live-data-info" className="data-table-div">
-              {current_outage}
-              {previous_outage}
+
               <table className="main-table">
                 <tr>
                   <th className="data-table-title">Charger</th>
@@ -143,6 +161,8 @@ class LiveDataDisplay extends React.Component {
                   <td className="data-table-value">{obj.last_measurement.mas}</td>
                 </tr>
               </table>
+              {current_outage}
+              {previous_outage}
             </div>
             );
         } catch (error) {

@@ -63,10 +63,12 @@ body {
 
 .urgent-table {
 	border: 2px solid red;
+	width: 90%;
 }
 
 .important-table {
 	border: 2px solid orange;
+	width: 90%;
 }
 
 .data-table-title {
