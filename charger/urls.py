@@ -8,5 +8,5 @@ urlpatterns = [
 	path('', views.main_react, name="main_react"),
     path('new-measurement', views.new_measurement, name="new_measurement"),
     path('last-data', views.get_last_data_api, name="last_data"),
-    path('historical-data', views.get_historical_data_api, name="historical_data")
+    path('session-data', views.get_historical_data_api, name="historical_data")
 ]
