@@ -28,8 +28,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 if 'DJANGO_DEBUG_FALSE' in os.environ:
     DEBUG = False
     SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
-    ALLOWED_HOSTS = [os.environ['SITENAME']]
-    CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
+    ALLOWED_HOSTS = [os.environ['SITENAME'], 'localhost']
+    CSRF_TRUSTED_ORIGINS = [os.environ['SITENAME']]
 else:
     DEBUG = True
     SECRET_KEY = '6ws!^!x2ku+=#mva-g2$3cs%z8dz@r93i!=ltqqe!g%ca%cvyh'
