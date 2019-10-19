@@ -372,3 +372,132 @@ class LastDataAPITests(TestCase):
 		self.assertEqual(response_main_obj[0]['previous_outage']['emergency'], g.emergency_status)
 		self.assertEqual(response_main_obj[0]['previous_outage']['timestamp_start'][:19]+"Z", g.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
 		self.assertEqual(response_main_obj[0]['previous_outage']['timestamp_end'], False)
+
+class HistoricalDataAPITests(TestCase):
+	def test_only_get_is_allowed(self):
+		response = self.client.post(reverse('charger:historical_data'),
+			{'blah': 1},
+			content_type="application/json"
+			)
+		self.assertEqual(response.status_code, 403)
+	def test_get_data_when_there_are_no_sessions(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64)
+		response = self.client.get(reverse('charger:historical_data'))
+		self.assertEqual(response.status_code, 200)
+
+	def test_without_emergency_in_session(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64, charger_name = "f00f")
+		c = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "b" * 64, mas_sum=100)
+		f1 = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=800,
+			instantaneous_voltage=2800,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=10))
+		f2 = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=700,
+			instantaneous_voltage=2700,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=9))
+		response = self.client.get(reverse('charger:historical_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['historical_data']
+		self.assertEqual(response_main_obj[0]['charger_name'], model_a.charger_name)
+		self.assertEqual(response_main_obj[0]['session_list'][0]['session_name'], c.identifier_key)
+		self.assertEqual(response_main_obj[0]['session_list'][0]['emergency_valid'], False)
+
+	def test_with_emergency_in_session(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64, charger_name = "f00f")
+		c = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "b" * 64, mas_sum=100)
+		f1 = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=800,
+			instantaneous_voltage=2800,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=10))
+		f2 = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=700,
+			instantaneous_voltage=2700,
+			emergency_status=1,
+			timestamp=timezone.now()-datetime.timedelta(days=9))
+		response = self.client.get(reverse('charger:historical_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['historical_data']
+		self.assertEqual(response_main_obj[0]['charger_name'], model_a.charger_name)
+		self.assertEqual(response_main_obj[0]['session_list'][0]['session_name'], c.identifier_key)
+		self.assertEqual(response_main_obj[0]['session_list'][0]['emergency_valid'], True)
+		self.assertEqual(response_main_obj[0]['session_list'][0]['emergency_date'][:19]+"Z", f2.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+
+	def test_get_historical_data_two_chargers(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64, charger_name = "f00f")
+		model_b = ChargerModel.objects.create(identifier_key = "b" * 64, charger_name = "l0l")
+		c = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "b" * 64, mas_sum=100)
+		d = ChargeSession.objects.create(specific_charger = model_b, identifier_key = "c" * 64, mas_sum=20)
+		e = ChargeSession.objects.create(specific_charger = model_b, identifier_key = "d" * 64, mas_sum=10)
+		f1 = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=800,
+			instantaneous_voltage=2800,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=10))
+		f2 = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=700,
+			instantaneous_voltage=2700,
+			emergency_status=1,
+			timestamp=timezone.now()-datetime.timedelta(days=9))
+		f3 = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=600,
+			instantaneous_voltage=2600,
+			emergency_status=1,
+			timestamp=timezone.now()-datetime.timedelta(days=8))
+		g1 = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=500,
+			instantaneous_voltage=2500,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=7))
+		g2 = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=400,
+			instantaneous_voltage=2400,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=6))
+		g3 = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=300,
+			instantaneous_voltage=2300,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=5))
+		h1 = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=200,
+			instantaneous_voltage=2200,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=4))
+		h2 = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=100,
+			instantaneous_voltage=2100,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=3))
+		h3 = IndividualMeasurementModel.objects.create(specific_session = e, 
+			instantaneous_current=50,
+			instantaneous_voltage=2000,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=2))
+		response = self.client.get(reverse('charger:historical_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['historical_data']
+		self.assertEqual(response_main_obj[0]['charger_name'], model_a.charger_name)
+		self.assertEqual(response_main_obj[0]['session_list'][0]['session_name'], c.identifier_key)
+		self.assertEqual(response_main_obj[0]['session_list'][0]['emergency_valid'], True)
+		self.assertEqual(response_main_obj[0]['session_list'][0]['mas_sum'], c.mas_sum)
+		self.assertEqual(response_main_obj[0]['session_list'][0]['start_date'][:19]+"Z", f1.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+		self.assertEqual(response_main_obj[0]['session_list'][0]['end_date'][:19]+"Z", f3.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+		self.assertEqual(response_main_obj[0]['session_list'][0]['emergency_date'][:19]+"Z", f2.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+
+		self.assertEqual(response_main_obj[1]['charger_name'], model_b.charger_name)
+		self.assertEqual(response_main_obj[1]['session_list'][0]['session_name'], d.identifier_key)
+
+		self.assertEqual(response_main_obj[1]['charger_name'], model_b.charger_name)
+		self.assertEqual(response_main_obj[1]['session_list'][1]['session_name'], e.identifier_key)
+		self.assertEqual(response_main_obj[1]['session_list'][1]['emergency_valid'], False)
+		self.assertEqual(response_main_obj[1]['session_list'][1]['mas_sum'], e.mas_sum)
+		self.assertEqual(response_main_obj[1]['session_list'][1]['start_date'][:19]+"Z", h1.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+		self.assertEqual(response_main_obj[1]['session_list'][1]['end_date'][:19]+"Z", h3.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+		self.assertEqual(response_main_obj[1]['session_list'][1]['emergency_date'], False)

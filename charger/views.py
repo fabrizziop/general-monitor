@@ -104,3 +104,44 @@ def get_last_data_api(request):
 			return HttpResponse(status=500)
 		data_to_send.append(temp_data)
 	return JsonResponse({'all_chargers_data': data_to_send}, status=200)
+
+def get_historical_data_api(request):
+	if request.method != "GET":
+		return HttpResponse(status=403)
+	data_to_send = []
+	for charger in ChargerModel.objects.all():
+		#checking if charger has any measurements:
+		try:
+			session_list = []
+			all_sessions = charger.chargesession_set.all().reverse()
+			for session in all_sessions:
+
+				session_name = session.identifier_key
+				start_date = session.individualmeasurementmodel_set.first().timestamp
+				end_date = session.individualmeasurementmodel_set.latest('id').timestamp
+				mas_sum = session.mas_sum
+				emergency_measurements = session.individualmeasurementmodel_set.filter(emergency_status__gt=0)
+				if emergency_measurements.count() > 0:
+					outage_cause = emergency_measurements.first()
+					emergency_date = outage_cause.timestamp
+					emergency_cause = outage_cause.emergency_status
+					emergency_valid = True
+				else:
+					emergency_date, emergency_cause, emergency_valid = False, False, False
+				session_list.append({
+					'session_name': session_name,
+					'start_date': start_date,
+					'end_date': end_date,
+					'mas_sum': mas_sum,
+					'emergency_valid': emergency_valid,
+					'emergency_date': emergency_date,
+					'emergency_cause': emergency_cause
+					})
+			temp_data = {
+				'charger_name': charger.charger_name,
+				'session_list': session_list
+			}
+		except ObjectDoesNotExist:
+			return HttpResponse(status=500)
+		data_to_send.append(temp_data)
+	return JsonResponse({'historical_data': data_to_send}, status=200)
