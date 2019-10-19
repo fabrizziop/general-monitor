@@ -2,6 +2,12 @@
 {% block page_script %}
 <script type="text/babel">
 "use strict";
+
+const EMERGENCY_FALSE = "N/A"
+const EMERGENCY_POWER_OUTAGE = "Lost UART/Power";
+const EMERGENCY_OVP = "Overvoltage";
+const EMERGENCY_OTHER = "EMERGENCY";
+
 class MainMonitor extends React.Component {
   constructor(props) {
     super(props);
@@ -107,7 +113,7 @@ class LiveDataDisplay extends React.Component {
                 </tr>
                 <tr>
                   <th className="data-table-title">Emergency</th>
-                  <td className="data-table-value">{obj.previous_outage.emergency}</td>
+                  <td className="data-table-value">{(obj.previous_outage.emergency == 0) ? EMERGENCY_FALSE : (obj.previous_outage.emergency == 1) ? EMERGENCY_POWER_OUTAGE : (obj.previous_outage.emergency == 2) ? EMERGENCY_OVP : (obj.previous_outage.emergency > 2) ? EMERGENCY_OTHER : ''}</td>
                 </tr>
                 <tr>
                   <th className="data-table-title">Start</th>
@@ -154,15 +160,15 @@ class LiveDataDisplay extends React.Component {
                 </tr>
                 <tr>
                   <th className="data-table-title">Emergency</th>
-                  <td className="data-table-value">{obj.last_measurement.emergency}</td>
+                  <td className="data-table-value">{(obj.last_measurement.emergency == 0) ? EMERGENCY_FALSE : (obj.last_measurement.emergency == 1) ? EMERGENCY_POWER_OUTAGE : (obj.last_measurement.emergency == 2) ? EMERGENCY_OVP : (obj.last_measurement.emergency > 2) ? EMERGENCY_OTHER : ''}</td>
                 </tr>
                 <tr>
                   <th className="data-table-title">Voltage</th>
-                  <td className="data-table-value">{obj.last_measurement.voltage}</td>
+                  <td className="data-table-value">{((obj.last_measurement.voltage)/100).toFixed(2)} V</td>
                 </tr>
                 <tr>
                   <th className="data-table-title">Current</th>
-                  <td className="data-table-value">{obj.last_measurement.current}</td>
+                  <td className="data-table-value">{((obj.last_measurement.current)/100).toFixed(2)} A</td>
                 </tr>
                 <tr>
                   <th className="data-table-title">mAs</th>
@@ -251,7 +257,7 @@ class SessionHistoryDisplay extends React.Component {
               emergency_cause = (
                 <tr>
                   <th className="data-table-title">Emer</th>
-                  <td className="data-table-value">{session_obj.emergency_cause}</td>
+                  <td className="data-table-value">{(session_obj.emergency_cause == 0) ? EMERGENCY_FALSE : (session_obj.emergency_cause == 1) ? EMERGENCY_POWER_OUTAGE : (session_obj.emergency_cause == 2) ? EMERGENCY_OVP : (session_obj.emergency_cause > 2) ? EMERGENCY_OTHER : ''}</td>
                 </tr>);
             };
             return (
