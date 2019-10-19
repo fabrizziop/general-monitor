@@ -68,7 +68,7 @@ class LiveDataMain extends React.Component {
   }
 
   render() {
-    console.log(this.state.lastDataCollected);
+    //console.log(this.state.lastDataCollected);
     return (
       <div id="live-monitor">
         <div className={this.state.isLastDataValid ? "valid-data data-valid-indicator" : "invalid-data data-valid-indicator"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
@@ -187,7 +187,7 @@ class LiveDataDisplay extends React.Component {
             )
         };
       })
-    console.log(this.props.collectedData);
+    //console.log(this.props.collectedData);
     return (
       <div id="live-data-display">
         {session_info}
@@ -228,7 +228,7 @@ class SessionHistoryMain extends React.Component {
   }
 
   render() {
-    console.log(this.state.lastDataCollected);
+    //console.log(this.state.lastDataCollected);
     return (
       <div id="session-monitor">
         <div className={this.state.isLastDataValid ? "valid-data data-valid-indicator" : "invalid-data data-valid-indicator"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
@@ -299,7 +299,7 @@ class SessionHistoryDisplay extends React.Component {
             )
         };
       })
-    console.log(this.props.collectedData);
+    //console.log(this.props.collectedData);
     return (
       <div id="session-data-display">
         {session_info}
