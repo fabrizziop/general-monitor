@@ -25,12 +25,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-if 'DJANGO_DEBUG_FALSE' in os.environ:  
+if 'DJANGO_DEBUG_FALSE' in os.environ:
     DEBUG = False
-    SECRET_KEY = os.environ['DJANGO_SECRET_KEY']  
-    ALLOWED_HOSTS = [os.environ['SITENAME'], 'localhost']  
+    SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+    ALLOWED_HOSTS = [os.environ['SITENAME']]
+    CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
 else:
-    DEBUG = True  
+    DEBUG = True
     SECRET_KEY = '6ws!^!x2ku+=#mva-g2$3cs%z8dz@r93i!=ltqqe!g%ca%cvyh'
     ALLOWED_HOSTS = []
 
