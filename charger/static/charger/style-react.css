@@ -74,9 +74,13 @@ body {
 .data-table-title {
 	width: 30%;
 	border-bottom: 1px solid black;
+	text-align: left;
 }
 
 .data-table-value {
-	
 	border-bottom: 1px solid black;
+}
+
+.important-table-title {
+	text-align: center;
 }

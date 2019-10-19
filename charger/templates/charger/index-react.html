@@ -86,7 +86,7 @@ class LiveDataDisplay extends React.Component {
             current_outage = (
               <table className="main-table urgent-table">
                 <tr>
-                  <th className="data-table-title" colspan="2">CURRENT OUTAGE</th>
+                  <th className="data-table-title important-table-title" colspan="2">CURRENT OUTAGE</th>
                 </tr>
                 <tr>
                   <th className="data-table-title">Emergency</th>
@@ -102,7 +102,7 @@ class LiveDataDisplay extends React.Component {
             previous_outage = (
               <table className="main-table important-table">
                 <tr>
-                  <th className="data-table-title" colspan="2">PREVIOUS OUTAGE</th>
+                  <th className="data-table-title important-table-title" colspan="2">PREVIOUS OUTAGE</th>
                 </tr>
                 <tr>
                   <th className="data-table-title">Emergency</th>
@@ -232,27 +232,55 @@ class SessionHistoryDisplay extends React.Component {
     const session_info = this.props.collectedData.historical_data.map((obj) => {
         try {
           const current_charger_all_sessions = obj.session_list.map((session_obj) => {
+            var emergency_date = '';
+            var emergency_cause = '';
+            if (session_obj.emergency_valid) {
+              emergency_date = (
+                <tr>
+                  <th className="data-table-title">Emer Date</th>
+                  <td className="data-table-value">{session_obj.emergency_date}</td>
+                </tr>);
+              emergency_cause = (
+                <tr>
+                  <th className="data-table-title">Emer</th>
+                  <td className="data-table-value">{session_obj.emergency_cause}</td>
+                </tr>);
+            };
             return (
-              <div className="individual-session-info">
-                <div className="measurement-data">Session: {session_obj.session_name.slice(0,8)}</div>
-                <div className="measurement-data">Start Date: {session_obj.start_date}</div>
-                <div className="measurement-data">End Date: {session_obj.end_date}</div>
-                <div className="measurement-data">Ah Deliv: {(session_obj.mas_sum / 3600000).toFixed(3)}</div>
-                {(session_obj.emergency_valid) ? (<div className="measurement-data">Emer Date: {session_obj.emergency_date}</div>) : ''}
-                {(session_obj.emergency_valid) ? (<div className="measurement-data">Emer Cause: {session_obj.emergency_cause}</div>) : ''}
-              </div>
+              <table className="sub1-table">
+                <tr>
+                  <th className="data-table-title">Session</th>
+                  <td className="data-table-value">{session_obj.session_name.slice(0,8)}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Sess Beg</th>
+                  <td className="data-table-value">{session_obj.start_date}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Sess End</th>
+                  <td className="data-table-value">{session_obj.end_date}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Ah</th>
+                  <td className="data-table-value">{(session_obj.mas_sum / 3600000).toFixed(3)}</td>
+                </tr>
+                {emergency_cause}
+                {emergency_date}
+              </table>
+              
               )
           });
           return (
-            <div id="session-data-info">
-              <div className="charger-data">Charger: {obj.charger_name}</div>
+            <div id="session-data-info" className="main-table">
+              <div className="important-table-title">Charger: {obj.charger_name}</div>
               {current_charger_all_sessions}
             </div>
             );
         } catch (error) {
+          console.log(error);
           return (
             <div id="session-data-info">
-              <div className="charger-data">API ERROR/WRONG DATA</div>
+              <div className="important-table-title">API ERROR/WRONG DATA</div>
             </div>
             )
         };
