@@ -373,6 +373,70 @@ class LastDataAPITests(TestCase):
 		self.assertEqual(response_main_obj[0]['previous_outage']['timestamp_start'][:19]+"Z", g.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
 		self.assertEqual(response_main_obj[0]['previous_outage']['timestamp_end'], False)
 
+	def test_old_measurement_is_reported_as_not_recent(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64, charger_name = "f00f")
+		c = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "b" * 64, mas_sum=100)
+		d = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "c" * 64, mas_sum=20)
+		f = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=100,
+			instantaneous_voltage=2800,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(minutes=35))
+		g = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=20,
+			instantaneous_voltage=200,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(minutes=30))
+		h = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=10,
+			instantaneous_voltage=1,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(minutes=25))
+		i = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=9999,
+			instantaneous_voltage=9888,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(minutes=20))
+		response = self.client.get(reverse('charger:last_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['all_chargers_data']
+		self.assertEqual(response_main_obj[0]['charger_name'], model_a.charger_name)
+		self.assertEqual(response_main_obj[0]['last_session_id'], d.identifier_key)
+		self.assertEqual(response_main_obj[0]['measurement_recent'], False)
+
+	def test_new_measurement_is_reported_as_recent(self):
+		model_a = ChargerModel.objects.create(identifier_key = "a" * 64, charger_name = "f00f")
+		c = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "b" * 64, mas_sum=100)
+		d = ChargeSession.objects.create(specific_charger = model_a, identifier_key = "c" * 64, mas_sum=20)
+		f = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=100,
+			instantaneous_voltage=2800,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(minutes=35))
+		g = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=20,
+			instantaneous_voltage=200,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(minutes=30))
+		h = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=10,
+			instantaneous_voltage=1,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(minutes=25))
+		i = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=9999,
+			instantaneous_voltage=9888,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(minutes=2))
+		response = self.client.get(reverse('charger:last_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['all_chargers_data']
+		self.assertEqual(response_main_obj[0]['charger_name'], model_a.charger_name)
+		self.assertEqual(response_main_obj[0]['last_session_id'], d.identifier_key)
+		self.assertEqual(response_main_obj[0]['measurement_recent'], True)
+
 class HistoricalDataAPITests(TestCase):
 	def test_only_get_is_allowed(self):
 		response = self.client.post(reverse('charger:historical_data'),

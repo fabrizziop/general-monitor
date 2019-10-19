@@ -79,8 +79,9 @@ class LiveDataDisplay extends React.Component {
   render() {
     const session_info = this.props.collectedData.all_chargers_data.map((obj) => {
         //console.log(obj);
-        let current_outage = '';
-        let previous_outage = '';
+        var current_outage = '';
+        var previous_outage = '';
+        var old_measurement = '';
         try {
           if (obj.current_outage.valid) {
             current_outage = (
@@ -117,10 +118,17 @@ class LiveDataDisplay extends React.Component {
                   <td className="data-table-value">{obj.previous_outage.timestamp_end}</td>
                 </tr>
               </table>);
+          if (obj.measurement_recent == false) {
+            old_measurement = (
+              <div id="session-too-old-info" className="main-table urgent-table">
+                <div className="important-table-title">DATA IS OLD</div>
+              </div>
+              )
+          }
           };
           return (
             <div id="live-data-info" className="data-table-div">
-
+              {old_measurement}
               <table className="main-table">
                 <tr>
                   <th className="data-table-title">Charger</th>

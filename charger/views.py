@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+import datetime
 from .models import ChargerModel, ChargeSession, IndividualMeasurementModel
 import json
 # Create your views here.
@@ -52,11 +54,13 @@ def get_last_data_api(request):
 		try:
 			last_session = charger.chargesession_set.latest('id')
 			last_measurement = last_session.individualmeasurementmodel_set.latest('id')
+			measurement_received_short_time_ago = (timezone.now() - last_measurement.timestamp) <= datetime.timedelta(minutes=5)
 			temp_data = {
 				'charger_name': charger.charger_name,
 				'last_session_id': last_session.identifier_key,
 				'last_session_mas': last_session.mas_sum,
 				'last_session_begin': last_session.individualmeasurementmodel_set.first().timestamp,
+				'measurement_recent': measurement_received_short_time_ago,
 				'current_outage': {
 					'valid': False,
 					'emergency': False,
