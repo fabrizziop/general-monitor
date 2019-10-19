@@ -65,7 +65,7 @@ class LiveDataMain extends React.Component {
     console.log(this.state.lastDataCollected);
     return (
       <div id="live-monitor">
-        <div id="live-data-valid" className={this.state.isLastDataValid ? "valid-data" : "invalid-data"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
+        <div className={this.state.isLastDataValid ? "valid-data data-valid-indicator" : "invalid-data data-valid-indicator"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
         {(this.state.isInitialized) ? (<LiveDataDisplay collectedData={this.state.lastDataCollected}/>) : (<div>Not Initialized</div>)}
       </div>
       )
@@ -84,34 +84,65 @@ class LiveDataDisplay extends React.Component {
         try {
           if (obj.current_outage.valid) {
             current_outage = (
-              <div className="outage-data">
+              <table className="main-table urgent-table">
                 <div className="measurement-data">CURRENT OUTAGE</div>
                 <div className="measurement-data">Emergency: {obj.current_outage.emergency}</div>
                 <div className="measurement-data">Timestamp: {obj.current_outage.timestamp}</div>
-              </div>);
+              </table>);
           };
           if (obj.previous_outage.valid) {
             previous_outage = (
-              <div className="outage-data">
+              <table className="main-table important-table">
                 <div className="measurement-data">PREVIOUS OUTAGE</div>
                 <div className="measurement-data">Emergency: {obj.previous_outage.emergency}</div>
                 <div className="measurement-data">Start: {obj.previous_outage.timestamp_start}</div>
                 <div className="measurement-data">End: {obj.previous_outage.timestamp_end}</div>
-              </div>);
+              </table>);
           };
           return (
-            <div id="live-data-info">
+            <div id="live-data-info" className="data-table-div">
               {current_outage}
               {previous_outage}
-              <div className="charger-data">Charger: {obj.charger_name}</div>
-              <div className="charger-data">Session: {obj.last_session_id.slice(0,8)}</div>
-              <div className="charger-data">Session Begin: {obj.last_session_begin}</div>
-              <div className="charger-data">Milliamps-second: {obj.last_session_mas}</div>
-              <div className="measurement-data">Timestamp: {obj.last_measurement.timestamp}</div>
-              <div className="measurement-data">Emergency: {obj.last_measurement.emergency}</div>
-              <div className="measurement-data">Voltage: {obj.last_measurement.voltage}</div>
-              <div className="measurement-data">Current: {obj.last_measurement.current}</div>
-              <div className="measurement-data">mAs: {obj.last_measurement.mas}</div>
+              <table className="main-table">
+                <tr>
+                  <th className="data-table-title">Charger</th>
+                  <td className="data-table-value">{obj.charger_name}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Session</th>
+                  <td className="data-table-value">{obj.last_session_id.slice(0,8)}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Sess Beg:</th>
+                  <td className="data-table-value">{obj.last_session_begin}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Ah</th>
+                  <td className="data-table-value">{(obj.last_session_mas / 3600000).toFixed(3)}</td>
+                </tr>
+              </table>
+              <table className="sub1-table">
+                <tr>
+                  <th className="data-table-title">Timestamp</th>
+                  <td className="data-table-value">{obj.last_measurement.timestamp}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Emergency</th>
+                  <td className="data-table-value">{obj.last_measurement.emergency}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Voltage</th>
+                  <td className="data-table-value">{obj.last_measurement.voltage}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Current</th>
+                  <td className="data-table-value">{obj.last_measurement.current}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">mAs</th>
+                  <td className="data-table-value">{obj.last_measurement.mas}</td>
+                </tr>
+              </table>
             </div>
             );
         } catch (error) {
@@ -166,7 +197,7 @@ class SessionHistoryMain extends React.Component {
     console.log(this.state.lastDataCollected);
     return (
       <div id="session-monitor">
-        <div id="session-data-valid" className={this.state.isLastDataValid ? "valid-data" : "invalid-data"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
+        <div className={this.state.isLastDataValid ? "valid-data data-valid-indicator" : "invalid-data data-valid-indicator"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
         {(this.state.isInitialized) ? (<SessionHistoryDisplay collectedData={this.state.lastDataCollected}/>) : (<div>Not Initialized</div>)}
       </div>
       )
