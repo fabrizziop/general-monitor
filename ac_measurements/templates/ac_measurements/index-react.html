@@ -1,0 +1,314 @@
+{% extends 'charger/base-react.html' %}
+{% block page_script %}
+<script type="text/babel">
+"use strict";
+
+const EMERGENCY_FALSE = "N/A"
+const EMERGENCY_POWER_OUTAGE = "Lost UART/Power";
+const EMERGENCY_OVP = "Overvoltage";
+const EMERGENCY_OTHER = "EMERGENCY";
+
+class MainMonitor extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showLiveData: true,
+      showHistoricData: false,
+    };
+    this.toggleLiveDisplay = this.toggleLiveDisplay.bind(this);
+    this.toggleHistoricDisplay = this.toggleHistoricDisplay.bind(this);
+  }
+  toggleLiveDisplay() {
+    this.setState({showLiveData: !this.state.showLiveData});
+  }
+  toggleHistoricDisplay() {
+    this.setState({showHistoricData: !this.state.showHistoricData});
+  }
+  render() {
+    return (
+      <div>
+        <button id="toggle-live-data" className="main-buttons toggle-buttons" type="button" onClick={this.toggleLiveDisplay}>{(this.state.showLiveData) ? 'Hide' : 'Show Live'}</button>
+        {(this.state.showLiveData) ? <LiveDataMain /> : ''}
+        <button id="toggle-historic-data" className="main-buttons toggle-buttons" type="button" onClick={this.toggleHistoricDisplay}>{(this.state.showHistoricData) ? 'Hide' : 'Show History'}</button>
+        {(this.state.showHistoricData) ? <SessionHistoryMain /> : ''}
+      </div>
+      )
+  }
+}
+
+class LiveDataMain extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isInitialized: false,
+      isShowingLiveData: true,
+      isLastDataValid: false,
+      lastDataCollected: []
+    };
+    this.refreshData = this.refreshData.bind(this);
+
+  }
+  componentDidMount() {
+    this.refreshData();
+    this.refreshInterval = setInterval(this.refreshData, 5000)
+  }
+  componentWillUnmount() {
+    clearInterval(this.refreshInterval);
+  }
+
+  async refreshData() {
+    try {
+      const response = await fetch('last-data');
+      const json = await response.json();
+      this.setState({isInitialized: true, isLastDataValid: true, lastDataCollected: json});
+    } catch (error) {
+      this.setState({isLastDataValid: false});
+      console.log(error);
+    }
+  }
+
+  render() {
+    //console.log(this.state.lastDataCollected);
+    return (
+      <div id="live-monitor">
+        <div className={this.state.isLastDataValid ? "valid-data data-valid-indicator" : "invalid-data data-valid-indicator"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
+        {(this.state.isInitialized) ? (<LiveDataDisplay collectedData={this.state.lastDataCollected}/>) : (<div>Not Initialized</div>)}
+      </div>
+      )
+  }
+}
+
+class LiveDataDisplay extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    const session_info = this.props.collectedData.all_chargers_data.map((obj) => {
+        //console.log(obj);
+        var current_outage = '';
+        var previous_outage = '';
+        var old_measurement = '';
+        try {
+          if (obj.current_outage.valid) {
+            current_outage = (
+              <table className="main-table urgent-table">
+                <tr>
+                  <th className="data-table-title important-table-title" colspan="2">CURRENT OUTAGE</th>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Emergency</th>
+                  <td className="data-table-value">{obj.current_outage.emergency}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Timestamp</th>
+                  <td className="data-table-value">{obj.current_outage.timestamp}</td>
+                </tr>
+              </table>);
+          };
+          if (obj.previous_outage.valid) {
+            previous_outage = (
+              <table className="main-table important-table">
+                <tr>
+                  <th className="data-table-title important-table-title" colspan="2">PREVIOUS OUTAGE</th>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Emergency</th>
+                  <td className="data-table-value">{(obj.previous_outage.emergency == 0) ? EMERGENCY_FALSE : (obj.previous_outage.emergency == 1) ? EMERGENCY_POWER_OUTAGE : (obj.previous_outage.emergency == 2) ? EMERGENCY_OVP : (obj.previous_outage.emergency > 2) ? EMERGENCY_OTHER : ''}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Start</th>
+                  <td className="data-table-value">{obj.previous_outage.timestamp_start}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">End</th>
+                  <td className="data-table-value">{obj.previous_outage.timestamp_end}</td>
+                </tr>
+              </table>);
+          if (obj.measurement_recent == false) {
+            old_measurement = (
+              <div id="session-too-old-info" className="main-table urgent-table">
+                <div className="important-table-title">DATA IS OLD</div>
+              </div>
+              )
+          }
+          };
+          return (
+            <div id="live-data-info" className="data-table-div">
+              {old_measurement}
+              <table className="main-table">
+                <tr>
+                  <th className="data-table-title">Charger</th>
+                  <td className="data-table-value">{obj.charger_name}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Session</th>
+                  <td className="data-table-value">{obj.last_session_id.slice(0,8)}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Sess Beg:</th>
+                  <td className="data-table-value">{obj.last_session_begin}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Ah</th>
+                  <td className="data-table-value">{(obj.last_session_mas / 3600000).toFixed(3)}</td>
+                </tr>
+              </table>
+              <table className="sub1-table">
+                <tr>
+                  <th className="data-table-title">Timestamp</th>
+                  <td className="data-table-value">{obj.last_measurement.timestamp}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Emergency</th>
+                  <td className="data-table-value">{(obj.last_measurement.emergency == 0) ? EMERGENCY_FALSE : (obj.last_measurement.emergency == 1) ? EMERGENCY_POWER_OUTAGE : (obj.last_measurement.emergency == 2) ? EMERGENCY_OVP : (obj.last_measurement.emergency > 2) ? EMERGENCY_OTHER : ''}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Voltage</th>
+                  <td className="data-table-value">{((obj.last_measurement.voltage)/100).toFixed(2)} V</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Current</th>
+                  <td className="data-table-value">{((obj.last_measurement.current)/100).toFixed(2)} A</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">mAs</th>
+                  <td className="data-table-value">{obj.last_measurement.mas}</td>
+                </tr>
+              </table>
+              {current_outage}
+              {previous_outage}
+            </div>
+            );
+        } catch (error) {
+          return (
+            <div id="live-data-info">
+              <div className="charger-data">API ERROR/WRONG DATA</div>
+            </div>
+            )
+        };
+      })
+    //console.log(this.props.collectedData);
+    return (
+      <div id="live-data-display">
+        {session_info}
+      </div>
+      )
+  }
+}
+
+class SessionHistoryMain extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isInitialized: false,
+      isShowingData: true,
+      isLastDataValid: false,
+      lastDataCollected: []
+    };
+    this.refreshData = this.refreshData.bind(this);
+
+  }
+  componentDidMount() {
+    this.refreshData();
+    this.refreshInterval = setInterval(this.refreshData, 60000)
+  }
+  componentWillUnmount() {
+    clearInterval(this.refreshInterval);
+  }
+
+  async refreshData() {
+    try {
+      const response = await fetch('session-data');
+      const json = await response.json();
+      this.setState({isInitialized: true, isLastDataValid: true, lastDataCollected: json});
+    } catch (error) {
+      this.setState({isLastDataValid: false});
+      console.log(error);
+    }
+  }
+
+  render() {
+    //console.log(this.state.lastDataCollected);
+    return (
+      <div id="session-monitor">
+        <div className={this.state.isLastDataValid ? "valid-data data-valid-indicator" : "invalid-data data-valid-indicator"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
+        {(this.state.isInitialized) ? (<SessionHistoryDisplay collectedData={this.state.lastDataCollected}/>) : (<div>Not Initialized</div>)}
+      </div>
+      )
+  }
+}
+
+class SessionHistoryDisplay extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    const session_info = this.props.collectedData.historical_data.map((obj) => {
+        try {
+          const current_charger_all_sessions = obj.session_list.map((session_obj) => {
+            var emergency_date = '';
+            var emergency_cause = '';
+            if (session_obj.emergency_valid) {
+              emergency_date = (
+                <tr>
+                  <th className="data-table-title">Emer Date</th>
+                  <td className="data-table-value">{session_obj.emergency_date}</td>
+                </tr>);
+              emergency_cause = (
+                <tr>
+                  <th className="data-table-title">Emer</th>
+                  <td className="data-table-value">{(session_obj.emergency_cause == 0) ? EMERGENCY_FALSE : (session_obj.emergency_cause == 1) ? EMERGENCY_POWER_OUTAGE : (session_obj.emergency_cause == 2) ? EMERGENCY_OVP : (session_obj.emergency_cause > 2) ? EMERGENCY_OTHER : ''}</td>
+                </tr>);
+            };
+            return (
+              <table className="sub1-table">
+                <tr>
+                  <th className="data-table-title">Session</th>
+                  <td className="data-table-value">{session_obj.session_name.slice(0,8)}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Sess Beg</th>
+                  <td className="data-table-value">{session_obj.start_date}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Sess End</th>
+                  <td className="data-table-value">{session_obj.end_date}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Ah</th>
+                  <td className="data-table-value">{(session_obj.mas_sum / 3600000).toFixed(3)}</td>
+                </tr>
+                {emergency_cause}
+                {emergency_date}
+              </table>
+              
+              )
+          });
+          return (
+            <div id="session-data-info" className="main-table">
+              <div className="important-table-title">Charger: {obj.charger_name}</div>
+              {current_charger_all_sessions}
+            </div>
+            );
+        } catch (error) {
+          console.log(error);
+          return (
+            <div id="session-data-info">
+              <div className="important-table-title">API ERROR/WRONG DATA</div>
+            </div>
+            )
+        };
+      })
+    //console.log(this.props.collectedData);
+    return (
+      <div id="session-data-display">
+        {session_info}
+      </div>
+      )
+  }
+}
+
+console.clear();
+ReactDOM.render(<MainMonitor />, document.getElementById("react-id")); 
+</script>
+{% endblock %}
