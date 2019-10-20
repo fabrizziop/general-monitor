@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'charger.apps.ChargerConfig'
+    'charger.apps.ChargerConfig',
+    'ac_measurements.apps.AcMeasurementsConfig'
 ]
 
 MIDDLEWARE = [
