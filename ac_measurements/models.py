@@ -11,3 +11,4 @@ class CurrentMeasurementModel(models.Model):
 	specific_sensor = models.ForeignKey(SensorModel, on_delete=models.CASCADE)
 	current = models.IntegerField(default=0)
 	frequency = models.IntegerField(default=0)
+	timestamp = models.DateTimeField(default=timezone.now)
