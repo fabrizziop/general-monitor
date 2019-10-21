@@ -73,7 +73,7 @@ class LiveDataDisplay extends React.Component {
   }
   render() {
     const session_info = this.props.collectedData.all_sensors_data.map((obj) => {
-        //console.log(obj);
+        console.log(obj);
         var old_measurement = '';
         try {
           if (obj.measurement_recent == false) {
@@ -102,6 +102,14 @@ class LiveDataDisplay extends React.Component {
                 <tr>
                   <th className="data-table-title">Timestamp</th>
                   <td className="data-table-value">{obj.timestamp}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Last 5m</th>
+                  <td className="data-table-value">{(obj.last_5m / 100).toFixed(2)} A</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Last 1h</th>
+                  <td className="data-table-value">{(obj.last_hour / 100).toFixed(2)} A</td>
                 </tr>
               </table>
             </div>
