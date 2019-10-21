@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.db.models import Avg
 import datetime
 from .models import SensorModel, CurrentMeasurementModel
 import json
@@ -38,12 +39,18 @@ def get_last_data_api(request):
 		try:
 			last_measurement = sensor.currentmeasurementmodel_set.latest('id')
 			measurement_received_short_time_ago = (timezone.now() - last_measurement.timestamp) <= datetime.timedelta(minutes=5)
+			last_five_minutes = sensor.currentmeasurementmodel_set.filter(timestamp__gte=(timezone.now() - datetime.timedelta(minutes=5)))
+			last_hour = sensor.currentmeasurementmodel_set.filter(timestamp__gte=(timezone.now() - datetime.timedelta(hours=1)))
+			last_five_minutes_average_current = last_five_minutes.aggregate(Avg('current'))['current__avg']
+			last_hour_average_current = last_hour.aggregate(Avg('current'))['current__avg']
 			temp_data = {
 				'sensor_name': sensor.sensor_name,
 				'last_current': last_measurement.current,
 				'last_frequency': last_measurement.frequency,
 				'timestamp': last_measurement.timestamp,
 				'measurement_recent': measurement_received_short_time_ago,
+				'last_5m': last_five_minutes_average_current,
+				'last_hour': last_hour_average_current
 			}
 		except ObjectDoesNotExist:
 			return HttpResponse(status=500)

@@ -167,3 +167,71 @@ class LastDataAPITests(TestCase):
 		self.assertEqual(response_main_obj[1]['last_frequency'], d.frequency)
 		self.assertEqual(response_main_obj[1]['timestamp'][:19]+"Z", d.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
 		self.assertEqual(response_main_obj[1]['measurement_recent'], True)
+	def test_last_five_minutes_no_measurement(self):
+		model_a = SensorModel.objects.create(identifier_key = "a" * 64, sensor_name = "f00f")
+		f = CurrentMeasurementModel.objects.create(specific_sensor = model_a, 
+			current=100,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(minutes=40))
+		g = CurrentMeasurementModel.objects.create(specific_sensor = model_a, 
+			current=100,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(minutes=35))
+		response = self.client.get(reverse('ac_measurements:last_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['all_sensors_data']
+		self.assertEqual(response_main_obj[0]['last_5m'], None)
+	def test_last_hour_no_measurement(self):
+		model_a = SensorModel.objects.create(identifier_key = "a" * 64, sensor_name = "f00f")
+		f = CurrentMeasurementModel.objects.create(specific_sensor = model_a, 
+			current=100,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(hours=40))
+		g = CurrentMeasurementModel.objects.create(specific_sensor = model_a, 
+			current=100,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(hours=35))
+		response = self.client.get(reverse('ac_measurements:last_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['all_sensors_data']
+		self.assertEqual(response_main_obj[0]['last_hour'], None)
+	def test_last_five_minutes_with_measurements(self):
+		model_a = SensorModel.objects.create(identifier_key = "a" * 64, sensor_name = "f00f")
+		f = CurrentMeasurementModel.objects.create(specific_sensor = model_a, 
+			current=1000,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(minutes=10))
+		g = CurrentMeasurementModel.objects.create(specific_sensor = model_a, 
+			current=100,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(minutes=4))
+		h = CurrentMeasurementModel.objects.create(specific_sensor = model_a, 
+			current=10,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(minutes=3))
+		response = self.client.get(reverse('ac_measurements:last_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['all_sensors_data']
+		self.assertEqual(response_main_obj[0]['last_5m'], 55)
+	def test_last_hour_with_measurements(self):
+		model_a = SensorModel.objects.create(identifier_key = "a" * 64, sensor_name = "f00f")
+		f = CurrentMeasurementModel.objects.create(specific_sensor = model_a, 
+			current=1000,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(hours=2))
+		g = CurrentMeasurementModel.objects.create(specific_sensor = model_a, 
+			current=100,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(minutes=59))
+		h = CurrentMeasurementModel.objects.create(specific_sensor = model_a, 
+			current=10,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(minutes=35))
+		response = self.client.get(reverse('ac_measurements:last_data'))
+		self.assertEqual(response.status_code, 200)
+		response_decoded_json = json.loads(response.content.decode('utf-8'))
+		response_main_obj = response_decoded_json['all_sensors_data']
+		self.assertEqual(response_main_obj[0]['last_hour'], 55)
