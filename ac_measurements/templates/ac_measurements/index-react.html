@@ -8,25 +8,18 @@ class MainMonitor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showLiveData: true,
-      showHistoricData: false,
+      showLiveData: true
     };
     this.toggleLiveDisplay = this.toggleLiveDisplay.bind(this);
-    this.toggleHistoricDisplay = this.toggleHistoricDisplay.bind(this);
   }
   toggleLiveDisplay() {
     this.setState({showLiveData: !this.state.showLiveData});
-  }
-  toggleHistoricDisplay() {
-    this.setState({showHistoricData: !this.state.showHistoricData});
   }
   render() {
     return (
       <div>
         <button id="toggle-live-data" className="main-buttons toggle-buttons" type="button" onClick={this.toggleLiveDisplay}>{(this.state.showLiveData) ? 'Hide' : 'Show Live'}</button>
         {(this.state.showLiveData) ? <LiveDataMain /> : ''}
-        <button id="toggle-historic-data" className="main-buttons toggle-buttons" type="button" onClick={this.toggleHistoricDisplay}>{(this.state.showHistoricData) ? 'Hide' : 'Show History'}</button>
-        {(this.state.showHistoricData) ? <SensorHistoryMain /> : ''}
       </div>
       )
   }
@@ -100,11 +93,11 @@ class LiveDataDisplay extends React.Component {
                 </tr>
                 <tr>
                   <th className="data-table-title">Current</th>
-                  <td className="data-table-value">{(obj.current / 100).toFixed(2)}</td>
+                  <td className="data-table-value">{(obj.last_current / 100).toFixed(2)} A</td>
                 </tr>
                 <tr>
                   <th className="data-table-title">Frequency</th>
-                  <td className="data-table-value">{(obj.frequency / 100).toFixed(2)}</td>
+                  <td className="data-table-value">{(obj.last_frequency / 100).toFixed(2)} Hz</td>
                 </tr>
                 <tr>
                   <th className="data-table-title">Timestamp</th>
