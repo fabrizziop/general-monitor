@@ -1,4 +1,4 @@
-{% extends 'ac_measurements/base-react.html' %}
+{% extends 'pingmonitor/base-react.html' %}
 {% block page_script %}
 <script type="text/babel">
 "use strict";
@@ -72,7 +72,7 @@ class LiveDataDisplay extends React.Component {
     super(props);
   }
   render() {
-    const session_info = this.props.collectedData.all_sensors_data.map((obj) => {
+    const session_info = this.props.collectedData.all_things_data.map((obj) => {
         console.log(obj);
         var old_measurement = '';
         try {
@@ -86,18 +86,14 @@ class LiveDataDisplay extends React.Component {
           return (
             <div id="live-data-info" className="data-table-div">
               {old_measurement}
-              <table className="main-table">
+              <table className={(obj.is_up) ? "main-table up-table" : "main-table down-table"}>
                 <tr>
                   <th className="data-table-title">Sensor</th>
-                  <td className="data-table-value">{obj.sensor_name}</td>
+                  <td className="data-table-value">{obj.thing_name}</td>
                 </tr>
                 <tr>
-                  <th className="data-table-title">Current</th>
-                  <td className="data-table-value">{(obj.last_current / 100).toFixed(2)} A</td>
-                </tr>
-                <tr>
-                  <th className="data-table-title">Frequency</th>
-                  <td className="data-table-value">{(obj.last_frequency / 100).toFixed(2)} Hz</td>
+                  <th className="data-table-title">Status</th>
+                  <td className="data-table-value">{(obj.is_up) ? "UP" : "DOWN"}</td>
                 </tr>
                 <tr>
                   <th className="data-table-title">Timestamp</th>
@@ -105,11 +101,11 @@ class LiveDataDisplay extends React.Component {
                 </tr>
                 <tr>
                   <th className="data-table-title">Last 5m</th>
-                  <td className="data-table-value">{(obj.last_5m / 100).toFixed(2)} A</td>
+                  <td className="data-table-value">{(obj.last_5m / 100).toFixed(2)} %</td>
                 </tr>
                 <tr>
                   <th className="data-table-title">Last 1h</th>
-                  <td className="data-table-value">{(obj.last_hour / 100).toFixed(2)} A</td>
+                  <td className="data-table-value">{(obj.last_hour / 100).toFixed(2)} %</td>
                 </tr>
               </table>
             </div>

@@ -22,6 +22,7 @@ def new_measurement(request):
 			#saving measurement
 			new_measurement = PingModel.objects.create(specific_thing=current_thing, 
 				is_up=ping_monitor_object["is_up"])
+		deleted_measurements = PingModel.objects.filter(timestamp__lt=(timezone.now() - datetime.timedelta(days=7))).delete()
 		return HttpResponse(
 			content_type='application/json',
 			status=201)

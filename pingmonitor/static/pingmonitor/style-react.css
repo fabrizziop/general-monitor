@@ -49,10 +49,15 @@ body {
 	margin: 0.5rem auto;
 	width: 100%;
 	background-color: hsl(120, 10%, 90%);
-	border: 2px solid hsl(120, 60%, 40%);
 	border-radius: 5px;
 }
 
+.up-table {
+	border: 2px solid hsl(120, 60%, 40%);
+}
+.down-table {
+	border: 2px solid hsl(0, 100%, 50%);
+}
 .sub1-table {
 	margin: 0.5rem auto;
 	width: 90%;

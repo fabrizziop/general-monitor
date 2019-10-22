@@ -91,6 +91,33 @@ class APITests(TestCase):
 		self.assertEqual(PingModel.objects.count(), 2)
 		self.assertEqual(PingModel.objects.last().is_up, True)
 		self.assertEqual(PingModel.objects.last().specific_thing, b)
+	def test_autodelete_old_measurement(self):
+		a = MonitoredThingModel(identifier_key = "a" * 64)
+		a.save()
+		self.assertEqual(PingModel.objects.count(), 0)
+		c = PingModel.objects.create(specific_thing = a, 
+			is_up=False,
+			timestamp=timezone.now()-datetime.timedelta(minutes=30))
+		self.assertEqual(PingModel.objects.count(), 1)
+		d = PingModel.objects.create(specific_thing = a, 
+			is_up=False,
+			timestamp=timezone.now()-datetime.timedelta(days=30))
+		self.assertEqual(PingModel.objects.count(), 2)
+		self.assertEqual(PingModel.objects.filter(timestamp__lt=(timezone.now() - datetime.timedelta(days=7))).count(), 1)
+		response = self.client.post(
+			reverse('pingmonitor:new_measurement'),
+			{"ping_measurements": [
+				{
+				"thing_id": "a"*64,
+				"is_up": False
+				}
+				]
+			},
+			content_type="application/json"
+			)
+		self.assertEqual(response.status_code, 201)
+		self.assertEqual(PingModel.objects.count(), 2)
+		self.assertEqual(PingModel.objects.filter(timestamp__lt=(timezone.now() - datetime.timedelta(days=7))).count(), 0)
 
 class ReactViewTests(TestCase):
 	def test_react_view_correct_template(self):
