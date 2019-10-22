@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'charger.apps.ChargerConfig',
-    'ac_measurements.apps.AcMeasurementsConfig'
+    'ac_measurements.apps.AcMeasurementsConfig',
+    'pingmonitor.apps.PingmonitorConfig'
 ]
 
 MIDDLEWARE = [

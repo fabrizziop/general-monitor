@@ -19,7 +19,8 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('charger/', include('charger.urls')),
-    path('current/', include('ac_measurements.urls'))
+    path('current/', include('ac_measurements.urls')),
+    path('ping/', include('pingmonitor.urls'))
 ]
 
 #if settings.DEBUG:

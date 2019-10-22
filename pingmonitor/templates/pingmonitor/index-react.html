@@ -1,0 +1,137 @@
+{% extends 'ac_measurements/base-react.html' %}
+{% block page_script %}
+<script type="text/babel">
+"use strict";
+
+
+class MainMonitor extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showLiveData: true
+    };
+    this.toggleLiveDisplay = this.toggleLiveDisplay.bind(this);
+  }
+  toggleLiveDisplay() {
+    this.setState({showLiveData: !this.state.showLiveData});
+  }
+  render() {
+    return (
+      <div>
+        <button id="toggle-live-data" className="main-buttons toggle-buttons" type="button" onClick={this.toggleLiveDisplay}>{(this.state.showLiveData) ? 'Hide' : 'Show Live'}</button>
+        {(this.state.showLiveData) ? <LiveDataMain /> : ''}
+      </div>
+      )
+  }
+}
+
+class LiveDataMain extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isInitialized: false,
+      isShowingLiveData: true,
+      isLastDataValid: false,
+      lastDataCollected: []
+    };
+    this.refreshData = this.refreshData.bind(this);
+
+  }
+  componentDidMount() {
+    this.refreshData();
+    this.refreshInterval = setInterval(this.refreshData, 5000)
+  }
+  componentWillUnmount() {
+    clearInterval(this.refreshInterval);
+  }
+
+  async refreshData() {
+    try {
+      const response = await fetch('last-data');
+      const json = await response.json();
+      this.setState({isInitialized: true, isLastDataValid: true, lastDataCollected: json});
+    } catch (error) {
+      this.setState({isLastDataValid: false});
+      console.log(error);
+    }
+  }
+
+  render() {
+    //console.log(this.state.lastDataCollected);
+    return (
+      <div id="live-monitor">
+        <div className={this.state.isLastDataValid ? "valid-data data-valid-indicator" : "invalid-data data-valid-indicator"}> {this.state.isLastDataValid ? "Data Valid" : "Data Error"} </div>
+        {(this.state.isInitialized) ? (<LiveDataDisplay collectedData={this.state.lastDataCollected}/>) : (<div>Not Initialized</div>)}
+      </div>
+      )
+  }
+}
+
+class LiveDataDisplay extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    const session_info = this.props.collectedData.all_sensors_data.map((obj) => {
+        console.log(obj);
+        var old_measurement = '';
+        try {
+          if (obj.measurement_recent == false) {
+            old_measurement = (
+              <div id="session-too-old-info" className="main-table urgent-table">
+                <div className="important-table-title">DATA IS OLD</div>
+              </div>
+              )
+          }
+          return (
+            <div id="live-data-info" className="data-table-div">
+              {old_measurement}
+              <table className="main-table">
+                <tr>
+                  <th className="data-table-title">Sensor</th>
+                  <td className="data-table-value">{obj.sensor_name}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Current</th>
+                  <td className="data-table-value">{(obj.last_current / 100).toFixed(2)} A</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Frequency</th>
+                  <td className="data-table-value">{(obj.last_frequency / 100).toFixed(2)} Hz</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Timestamp</th>
+                  <td className="data-table-value">{obj.timestamp}</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Last 5m</th>
+                  <td className="data-table-value">{(obj.last_5m / 100).toFixed(2)} A</td>
+                </tr>
+                <tr>
+                  <th className="data-table-title">Last 1h</th>
+                  <td className="data-table-value">{(obj.last_hour / 100).toFixed(2)} A</td>
+                </tr>
+              </table>
+            </div>
+            );
+        } catch (error) {
+          return (
+            <div id="live-data-info">
+              <div className="charger-data">API ERROR/WRONG DATA</div>
+            </div>
+            )
+        };
+      })
+    //console.log(this.props.collectedData);
+    return (
+      <div id="live-data-display">
+        {session_info}
+      </div>
+      )
+  }
+}
+
+console.clear();
+ReactDOM.render(<MainMonitor />, document.getElementById("react-id")); 
+</script>
+{% endblock %}

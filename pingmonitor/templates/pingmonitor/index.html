@@ -1,0 +1,21 @@
+{% extends 'charger/base.html' %}
+
+{% block page_content %}
+ {% for charger in all_chargers %}
+ 	<h3>Charger name: {{charger.charger_name}}</h3>
+ 	<h3>Charger ID: {{charger.identifier_key}}</h3>
+ 	<h4>Charge Sessions</h4>
+ 	{% for charge_session in charger.chargesession_set.all %}
+ 		<p>Session number: {{forloop.counter}}</p>
+ 		<p>Session ID: {{charge_session.identifier_key}}</p>
+ 		 {% for measurement in charge_session.individualmeasurementmodel_set.all %}
+ 			<p>Measurement number: {{forloop.counter}}</p>
+ 			<p>Current: {{measurement.instantaneous_current}}</p>
+ 			<p>Voltage: {{measurement.instantaneous_voltage}}</p>
+ 			<p>Emergency: {{measurement.emergency_status}}</p>
+ 			<p>mAs: {{measurement.milliampere_second}}</p>
+ 			<p>Timestamp: {{measurement.timestamp}}</p>
+ 		{% endfor %}
+ 	{% endfor %}
+ {% endfor %}
+{% endblock %}

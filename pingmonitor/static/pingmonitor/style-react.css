@@ -1,0 +1,86 @@
+body {
+	background-color: hsl(0, 0%, 20%);
+}
+
+#react-id {
+	margin: auto;
+	background-color: hsl(0, 0%, 90%);
+	width: 20rem;
+	margin-top: 3rem;
+	box-shadow: 4px 4px 4px hsl(0, 0%, 10%);
+	border-radius: 0.5rem;
+	padding: 0.5rem;
+}
+
+
+.data-valid-indicator {
+	text-align: center;
+	font-size: 1.2rem;
+	text-shadow: 0px 0px 10px hsl(0, 0%, 20%);
+}
+
+.valid-data {
+	color: green;
+}
+.invalid-data {
+	color: red;
+}
+
+.main-buttons {
+	display: block;
+	margin: auto;
+	font-size: 1.2rem;
+	text-shadow: 0px 0px 10px hsl(0, 0%, 40%);
+	color: black;
+	background: none;
+	border: 2px dashed hsl(0, 0%, 50%);
+	border-radius: 5px;
+	outline: none;
+}
+
+.outage-data {
+	border: 2px solid red;
+	border-radius: 5px;
+	padding: 0.25rem;
+	text-align: center;
+}
+
+.main-table {
+	margin: 0.5rem auto;
+	width: 100%;
+	background-color: hsl(120, 10%, 90%);
+	border: 2px solid hsl(120, 60%, 40%);
+	border-radius: 5px;
+}
+
+.sub1-table {
+	margin: 0.5rem auto;
+	width: 90%;
+	background-color: hsl(240, 10%, 90%);
+	border: 2px solid hsl(240, 60%, 40%);
+	border-radius: 5px;
+}
+
+.urgent-table {
+	border: 2px solid red;
+	width: 90%;
+}
+
+.important-table {
+	border: 2px solid orange;
+	width: 90%;
+}
+
+.data-table-title {
+	width: 30%;
+	border-bottom: 1px solid black;
+	text-align: left;
+}
+
+.data-table-value {
+	border-bottom: 1px solid black;
+}
+
+.important-table-title {
+	text-align: center;
+}
