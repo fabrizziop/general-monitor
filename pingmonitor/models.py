@@ -9,5 +9,5 @@ class MonitoredThingModel(models.Model):
 
 class PingModel(models.Model):
 	specific_thing = models.ForeignKey(MonitoredThingModel, on_delete=models.CASCADE)
-	is_up = models.BooleanField(default=False)
+	is_up = models.SmallIntegerField(default=0)
 	timestamp = models.DateTimeField(default=timezone.now)
