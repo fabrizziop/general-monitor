@@ -68,6 +68,29 @@ class APITests(TestCase):
 		self.assertEqual(CurrentMeasurementModel.objects.last().current, 99)
 		self.assertEqual(CurrentMeasurementModel.objects.last().frequency, 1)
 		self.assertEqual(CurrentMeasurementModel.objects.last().specific_sensor, b)
+def test_autodelete_old_measurement(self):
+		a = SensorModel(identifier_key = "a" * 64)
+		a.save()
+		self.assertEqual(CurrentMeasurementModel.objects.count(), 0)
+		b = CurrentMeasurementModel.objects.create(specific_sensor = a, 
+			current=500,
+			frequency=800,
+			timestamp=timezone.now()-datetime.timedelta(minutes=40))
+		self.assertEqual(CurrentMeasurementModel.objects.count(), 1)
+		c = CurrentMeasurementModel.objects.create(specific_sensor = a, 
+			current=100,
+			frequency=2800,
+			timestamp=timezone.now()-datetime.timedelta(days=40))
+		self.assertEqual(CurrentMeasurementModel.objects.count(), 2)
+		self.assertEqual(CurrentMeasurementModel.objects.filter(timestamp__lt=(timezone.now() - datetime.timedelta(days=15))).count(), 1)
+		response = self.client.post(
+			reverse('pingmonitor:new_measurement'),
+			generate_test_recv_object(sensor_id="a"*64, current=99, frequency=1),
+			content_type="application/json"
+			)
+		self.assertEqual(response.status_code, 201)
+		self.assertEqual(CurrentMeasurementModel.objects.count(), 2)
+		self.assertEqual(CurrentMeasurementModel.objects.filter(timestamp__lt=(timezone.now() - datetime.timedelta(days=15))).count(), 0)
 
 class ReactViewTests(TestCase):
 	def test_react_view_correct_template(self):

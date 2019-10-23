@@ -21,6 +21,7 @@ def new_measurement(request):
 		#saving measurement
 		new_measurement = CurrentMeasurementModel.objects.create(specific_sensor=current_sensor, 
 			current=json_obj["current"], frequency=json_obj["frequency"])
+		deleted_measurements = CurrentMeasurementModel.objects.filter(timestamp__lt=(timezone.now() - datetime.timedelta(days=15))).delete()
 		return HttpResponse(
 			content_type='application/json',
 			status=201)
