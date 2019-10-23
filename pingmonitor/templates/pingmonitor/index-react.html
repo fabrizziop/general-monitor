@@ -84,9 +84,9 @@ class LiveDataDisplay extends React.Component {
               )
           }
           return (
-            <div id="live-data-info" className="data-table-div">
+            <div className="data-table-div">
               {old_measurement}
-              <table className={(obj.is_up) ? "main-table up-table" : "main-table down-table"}>
+              <table className={(obj.is_up) ? "main-table up-table" : "main-table down-table"} style={(obj.measurement_recent) ? {} : {border: "2px solid orange"}}>
                 <tr>
                   <th className="data-table-title">Sensor</th>
                   <td className="data-table-value">{obj.thing_name}</td>

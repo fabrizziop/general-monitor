@@ -5,13 +5,12 @@ body {
 #react-id {
 	margin: auto;
 	background-color: hsl(0, 0%, 90%);
-	width: 20rem;
+	width: fit-content;
 	margin-top: 3rem;
 	box-shadow: 4px 4px 4px hsl(0, 0%, 10%);
 	border-radius: 0.5rem;
 	padding: 0.5rem;
 }
-
 
 .data-valid-indicator {
 	text-align: center;
@@ -88,4 +87,15 @@ body {
 
 .important-table-title {
 	text-align: center;
+}
+
+#live-data-display {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+}
+
+.data-table-div {
+	width: 20rem;
+	margin-left: 0.5rem;
 }
