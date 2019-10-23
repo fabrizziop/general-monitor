@@ -93,10 +93,10 @@ body {
 	width: 100%;
 	display: flex;
 	flex-direction: row;
+	flex-wrap: wrap;
 }
 
 .data-table-div {
 	width: 20rem;
 	margin-left: 0.5rem;
-	flex-wrap: wrap;
 }
