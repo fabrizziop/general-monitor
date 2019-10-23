@@ -98,4 +98,5 @@ body {
 .data-table-div {
 	width: 20rem;
 	margin-left: 0.5rem;
+	flex-wrap: wrap;
 }

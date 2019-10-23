@@ -6,3 +6,4 @@ charger/secrets.py
 charger/migrations/*
 /static
 .env
+pingmonitor/migrations/
