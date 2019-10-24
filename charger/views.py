@@ -6,7 +6,7 @@ from django.utils import timezone
 import datetime
 from .models import ChargerModel, ChargeSession, IndividualMeasurementModel
 import json
-from django.db.models import Min
+from django.db.models import Min, Max
 # Create your views here.
 
 @csrf_exempt
@@ -32,6 +32,11 @@ def new_measurement(request):
 		charge_session.mas_sum = charge_session.mas_sum + measurement_to_save.milliampere_second
 		charge_session.save()
 		measurement_to_save.save()
+		#deleting sessions older than 1 month!
+		all_sessions = current_charger.chargesession_set.annotate(last_timestamp = Max('individualmeasurementmodel__timestamp')).filter(last_timestamp__lt=(timezone.now() - datetime.timedelta(days=30)))
+		if all_sessions.count() >= 2:
+			#pass
+			all_sessions.earliest('last_timestamp').delete()
 		return HttpResponse(
 			content_type='application/json',
 			status=201)
@@ -121,7 +126,6 @@ def get_historical_data_api(request):
 			#all_sessions = charger.chargesession_set.all().reverse()
 			all_sessions = charger.chargesession_set.annotate(first_timestamp = Min('individualmeasurementmodel__timestamp')).order_by('-first_timestamp')
 			for session in all_sessions:
-
 				session_name = session.identifier_key
 				start_date = session.individualmeasurementmodel_set.first().timestamp
 				end_date = session.individualmeasurementmodel_set.latest('id').timestamp

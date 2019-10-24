@@ -547,6 +547,16 @@ class HistoricalDataAPITests(TestCase):
 		self.assertEqual(response.status_code, 200)
 		response_decoded_json = json.loads(response.content.decode('utf-8'))
 		response_main_obj = response_decoded_json['historical_data']
+		self.assertEqual(response_main_obj[1]['charger_name'], model_b.charger_name)
+		self.assertEqual(response_main_obj[1]['session_list'][0]['session_name'], e.identifier_key)
+		self.assertEqual(response_main_obj[1]['session_list'][0]['emergency_valid'], False)
+		self.assertEqual(response_main_obj[1]['session_list'][0]['mas_sum'], e.mas_sum)
+		self.assertEqual(response_main_obj[1]['session_list'][0]['start_date'][:19]+"Z", h1.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+		self.assertEqual(response_main_obj[1]['session_list'][0]['end_date'][:19]+"Z", h3.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
+
+		self.assertEqual(response_main_obj[1]['charger_name'], model_b.charger_name)
+		self.assertEqual(response_main_obj[1]['session_list'][1]['session_name'], d.identifier_key)
+
 		self.assertEqual(response_main_obj[0]['charger_name'], model_a.charger_name)
 		self.assertEqual(response_main_obj[0]['session_list'][0]['session_name'], c.identifier_key)
 		self.assertEqual(response_main_obj[0]['session_list'][0]['emergency_valid'], True)
@@ -554,14 +564,3 @@ class HistoricalDataAPITests(TestCase):
 		self.assertEqual(response_main_obj[0]['session_list'][0]['start_date'][:19]+"Z", f1.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
 		self.assertEqual(response_main_obj[0]['session_list'][0]['end_date'][:19]+"Z", f3.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
 		self.assertEqual(response_main_obj[0]['session_list'][0]['emergency_date'][:19]+"Z", f2.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
-
-		self.assertEqual(response_main_obj[1]['charger_name'], model_b.charger_name)
-		self.assertEqual(response_main_obj[1]['session_list'][0]['session_name'], d.identifier_key)
-
-		self.assertEqual(response_main_obj[1]['charger_name'], model_b.charger_name)
-		self.assertEqual(response_main_obj[1]['session_list'][1]['session_name'], e.identifier_key)
-		self.assertEqual(response_main_obj[1]['session_list'][1]['emergency_valid'], False)
-		self.assertEqual(response_main_obj[1]['session_list'][1]['mas_sum'], e.mas_sum)
-		self.assertEqual(response_main_obj[1]['session_list'][1]['start_date'][:19]+"Z", h1.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
-		self.assertEqual(response_main_obj[1]['session_list'][1]['end_date'][:19]+"Z", h3.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'))
-		self.assertEqual(response_main_obj[1]['session_list'][1]['emergency_date'], False)
