@@ -92,6 +92,66 @@ class APITests(TestCase):
 		self.assertEqual(ChargeSession.objects.get(identifier_key=charge_session_name_2).individualmeasurementmodel_set.count(), 1)
 		self.assertEqual(ChargeSession.objects.get(identifier_key=charge_session_name).mas_sum, currents[0] + currents[1])
 		self.assertEqual(ChargeSession.objects.get(identifier_key=charge_session_name_2).mas_sum, currents[2])
+	def test_autodelete_instant_measurement(self):
+		a = ChargerModel(identifier_key = "a" * 64)
+		a.save()
+		self.assertEqual(IndividualMeasurementModel.objects.count(), 0)
+		b = ChargeSession.objects.create(specific_charger = a, identifier_key = "b" * 64, mas_sum=100)
+		b1 = IndividualMeasurementModel.objects.create(specific_session = b, 
+			instantaneous_current=800,
+			instantaneous_voltage=2800,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=37))
+		b2 = IndividualMeasurementModel.objects.create(specific_session = b, 
+			instantaneous_current=700,
+			instantaneous_voltage=2700,
+			emergency_status=1,
+			timestamp=timezone.now()-datetime.timedelta(days=36))
+		self.assertEqual(ChargeSession.objects.count(), 1)
+		self.assertEqual(IndividualMeasurementModel.objects.count(), 2)
+		c = ChargeSession.objects.create(specific_charger = a, identifier_key = "c" * 64, mas_sum=100)
+		c1 = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=800,
+			instantaneous_voltage=2800,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=35))
+		c2 = IndividualMeasurementModel.objects.create(specific_session = c, 
+			instantaneous_current=700,
+			instantaneous_voltage=2700,
+			emergency_status=1,
+			timestamp=timezone.now()-datetime.timedelta(days=34))
+		self.assertEqual(ChargeSession.objects.count(), 2)
+		self.assertEqual(IndividualMeasurementModel.objects.count(), 4)
+		d = ChargeSession.objects.create(specific_charger = a, identifier_key = "d" * 64, mas_sum=100)
+		d1 = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=800,
+			instantaneous_voltage=2800,
+			emergency_status=0,
+			timestamp=timezone.now()-datetime.timedelta(days=25))
+		d2 = IndividualMeasurementModel.objects.create(specific_session = d, 
+			instantaneous_current=700,
+			instantaneous_voltage=2700,
+			emergency_status=1,
+			timestamp=timezone.now()-datetime.timedelta(days=24))
+		self.assertEqual(ChargeSession.objects.count(), 3)
+		self.assertEqual(IndividualMeasurementModel.objects.count(), 6)
+		response = self.client.post(
+			reverse('charger:new_measurement'),
+			generate_test_recv_object(charge_session="w"*64),
+			content_type="application/json"
+			)
+		self.assertEqual(response.status_code, 201)
+		self.assertEqual(ChargeSession.objects.count(), 3)
+		self.assertEqual(IndividualMeasurementModel.objects.count(), 5)
+		response = self.client.post(
+			reverse('charger:new_measurement'),
+			generate_test_recv_object(charge_session="w"*64),
+			content_type="application/json"
+			)
+		self.assertEqual(response.status_code, 201)
+		self.assertEqual(ChargeSession.objects.count(), 3)
+		self.assertEqual(IndividualMeasurementModel.objects.count(), 6)
+
 class ModelTests(TestCase):
 
 	def test_charger_model_uniqueness(self):
