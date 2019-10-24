@@ -6,6 +6,7 @@ from django.utils import timezone
 import datetime
 from .models import ChargerModel, ChargeSession, IndividualMeasurementModel
 import json
+from django.db.models import Min
 # Create your views here.
 
 @csrf_exempt
@@ -117,7 +118,8 @@ def get_historical_data_api(request):
 		#checking if charger has any measurements:
 		try:
 			session_list = []
-			all_sessions = charger.chargesession_set.all().reverse()
+			#all_sessions = charger.chargesession_set.all().reverse()
+			all_sessions = charger.chargesession_set.annotate(first_timestamp = Min('individualmeasurementmodel__timestamp')).order_by('first_timestamp')
 			for session in all_sessions:
 
 				session_name = session.identifier_key
